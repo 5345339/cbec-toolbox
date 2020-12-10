@@ -1,0 +1,1 @@
+alter table `t_order` add column `platform_account` varchar(64) not null default '';

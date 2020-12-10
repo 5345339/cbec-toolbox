@@ -57,7 +57,7 @@ public class UnhandledOrderNotifyService {
 
         accountList.forEach(account -> {
             syncUserUnhandledOrder(account);
-            notifyUserNewOrder(account.getUser());
+            notifyUserNewOrder(account.getUser(), account.getPlatformUser());
         });
     }
 
@@ -70,11 +70,15 @@ public class UnhandledOrderNotifyService {
 
         // 删除不存在的订单
         var orderIdList = orderList.stream().map(OrderDTO::getId).collect(Collectors.toList());
-        orderService.delete(new EntityWrapper<OrderEntity>().notIn("id", orderIdList));
+        orderService.delete(new EntityWrapper<OrderEntity>()
+                .eq("user", account.getUser())
+                .eq("platform_account", account.getPlatformUser())
+                .notIn("id", orderIdList));
 
         var orderEntityList = orderList.stream()
                 .map(s -> OrderEntity.getConverter().doBackward(s))
                 .peek(s -> s.setPlatform(account.getPlatform()))
+                .peek(s->s.setPlatformAccount(account.getPlatformUser()))
                 .peek(s -> s.setUser(account.getUser()))
                 .collect(Collectors.toList());
         orderService.insertOrUpdateBatch(orderEntityList);
@@ -82,23 +86,25 @@ public class UnhandledOrderNotifyService {
         log.info("发现用户{}的{}个未处理订单", account.getPlatformUser(), orderEntityList.size());
     }
 
-    private void notifyUserNewOrder(String user) {
+    private void notifyUserNewOrder(String user, String platformAccount) {
         if (!hasUnNotifyOrder(user)){
             return;
         }
 
         // 查询用户订单
         var orderList = orderService.selectList(new EntityWrapper<OrderEntity>()
-                .eq("user", user).orderBy("add_time", false));
+                .eq("user", user)
+                .eq("platform_account", platformAccount)
+                .orderBy("add_time", false));
         if (CollectionUtils.isEmpty(orderList)) {
             return;
         }
 
         var userInfo = userApiFeign.getUserInfo(user);
-        var messageDTO = new MessageDTO(userInfo.getEmail(), buildNotifyMessage(orderList));
+        var messageDTO = new MessageDTO(userInfo.getEmail(), buildNotifyMessage(user, platformAccount, orderList));
         messageApiFeign.sendMail(messageDTO);
 
-        log.info("通知用户{}有{}个未处理的订单", user, orderList.size());
+        log.info("通知用户{}下的帐号{}有{}个未处理的订单", user, platformAccount, orderList.size());
 
         // 更新最后通知时间
         var newOrderList = orderList.stream()
@@ -119,8 +125,12 @@ public class UnhandledOrderNotifyService {
         return calendar.getTime();
     }
 
-    private String buildNotifyMessage(List<OrderEntity> orderDTOList) {
-        String title = "您有" + orderDTOList.size() + "个未处理订单，请及时处理！";
+    private String buildNotifyMessage(String user, String platformAccount, List<OrderEntity> orderDTOList) {
+        if (CollectionUtils.isEmpty(orderDTOList)){
+            return "";
+        }
+
+        String title = String.format("您的账户[%s - %s]有%d个未处理订单，请及时处理！", user, platformAccount, orderDTOList.size());
         Map<String, Object> model = new HashMap<>();
         model.put("title", title);
         model.put("orders", orderDTOList);

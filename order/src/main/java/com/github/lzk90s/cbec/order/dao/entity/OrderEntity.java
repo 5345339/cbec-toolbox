@@ -17,6 +17,7 @@ public class OrderEntity {
     private String id;
     private String platform;
     private String user;
+    private String platformAccount;
     private String type;
     private Date confirmTime;
     private String sn;
