@@ -48,3 +48,9 @@ mybatis-plus:
     db-column-underline: true
     refresh-mapper: true
     id-type: 0
+
+task:
+  goodsSpiderTask:
+    enable: true
+  productUploadStatusTask:
+    enable: true

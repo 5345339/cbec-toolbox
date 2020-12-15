@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * 选品controller
  */
 @RestController
-@RequestMapping("/goods")
+@RequestMapping("/goods_select")
 public class GoodsSelectController {
     @Autowired
     private GoodsSpiderApiFeign goodsSpiderFeign;

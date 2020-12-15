@@ -3,6 +3,7 @@ package com.github.lzk90s.cbec.auth.dao.entity;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.IdType;
+import com.github.lzk90s.cbec.common.bean.BeanConverter;
 import com.github.lzk90s.cbec.internal.api.auth.UserInfoDTO;
 import com.google.common.base.Converter;
 import lombok.Data;
@@ -26,22 +27,7 @@ public class UserEntity {
     private String email;
     private Date addTime;
 
-    public static ConverterImpl getConverter() {
-        return new ConverterImpl();
-    }
-
-    public static class ConverterImpl extends Converter<UserEntity, UserInfoDTO> {
-
-        @Override
-        public UserInfoDTO doForward(UserEntity userEntity) {
-            UserInfoDTO userInfoDTO = new UserInfoDTO();
-            BeanUtils.copyProperties(userEntity, userInfoDTO);
-            return userInfoDTO;
-        }
-
-        @Override
-        public UserEntity doBackward(UserInfoDTO userInfoDTO) {
-            throw new UnsupportedOperationException();
-        }
+    public static BeanConverter<UserEntity, UserInfoDTO> getConverter() {
+        return new BeanConverter<>(UserEntity.class, UserInfoDTO.class);
     }
 }

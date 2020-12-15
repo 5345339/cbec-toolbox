@@ -10,7 +10,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,7 +23,7 @@ public class PlatformAccountApiImpl implements PlatformAccountApi {
     @Override
     public List<PlatformAccountDTO> listPlatformAccountByUser(String userName) {
         var list = platformAccountService.selectList(new EntityWrapper<PlatformAccountEntity>()
-                .eq("user_name", userName));
+                .eq("user", userName));
         if (CollectionUtils.isEmpty(list)) {
             return Collections.emptyList();
         }
@@ -40,5 +41,13 @@ public class PlatformAccountApiImpl implements PlatformAccountApi {
         return list.stream()
                 .map(s -> PlatformAccountEntity.getConverter().doForward(s))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public PlatformAccountDTO getUserPlatformAccount(String userName, String platformAccount) {
+        return listPlatformAccountByUser(userName).stream()
+                .filter(s -> s.getPlatformUser().equals(platformAccount))
+                .findFirst()
+                .orElse(null);
     }
 }

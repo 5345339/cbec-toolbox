@@ -6,16 +6,21 @@ from flask import Blueprint, request, Response
 from common import exception
 from ecommerce.ali1688 import ali1688
 from ecommerce.vova import vova
+from ecommerce.vova import vova_merchant_rest
 from util import json_util
 
 goods = Blueprint('goods', __name__)
+
+
+def response_json_data(response):
+    return Response(response, mimetype='application/json')
 
 
 @goods.route('/list_all_category/<platform>', methods=['GET'])
 def list_all_category(platform):
     category_list = vova.get_all_category()
     response = json_util.obj2json(category_list)
-    return Response(response, mimetype='application/json')
+    return response_json_data(response)
 
 
 @goods.route('/list_category_goods/<platform>', methods=['GET'])
@@ -40,7 +45,7 @@ def list_category_goods(platform):
 
     logging.info("list_category_goods cost {}(s)".format((end_time - start_time).seconds))
 
-    return Response(response, mimetype='application/json')
+    return response_json_data(response)
 
 
 @goods.route('/search_goods_by_image', methods=['GET'])
@@ -60,7 +65,34 @@ def search_goods_by_image():
 
     logging.info("search_goods_by_image cost {}(s)".format((end_time - start_time).seconds))
 
-    return Response(response, mimetype='application/json')
+    return response_json_data(response)
+
+
+@goods.route('/sync_product/<platform>', methods=['GET'])
+def sync_product(platform):
+    api_token = request.args.get("apiToken")
+    start_time = request.args.get("startTime")
+    end_time = request.args.get("endTime")
+    if not api_token or not start_time or not end_time:
+        raise ValueError("Invalid params")
+
+    response = json_util.obj2json(vova_merchant_rest.get_product_list(api_token, start_time, end_time))
+    return response_json_data(response)
+
+
+@goods.route('/upload_product/<platform>', methods=['POST'])
+def upload_product(platform):
+    api_token = request.args.get("apiToken")
+
+
+@goods.route('/upload_status/<platform>', methods=['GET'])
+def get_upload_status(platform):
+    api_token = request.args.get("apiToken")
+    upload_id = request.args.get("uploadId")
+    if not api_token or not upload_id:
+        raise ValueError("Invalid params")
+
+    vova_merchant_rest.get_upload_status_by_batch_id(api_token, upload_id)
 
 
 if __name__ == '__main__':

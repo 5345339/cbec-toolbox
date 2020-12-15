@@ -8,4 +8,5 @@ public class PlatformAccountDTO {
     private String platform;
     private String platformUser;
     private String platformPassword;
+    private String apiToken;
 }

@@ -3,6 +3,7 @@ package com.github.lzk90s.cbec.order.dao.entity;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.IdType;
+import com.github.lzk90s.cbec.common.bean.BeanConverter;
 import com.github.lzk90s.cbec.internal.api.spider.OrderDTO;
 import com.google.common.base.Converter;
 import lombok.Data;
@@ -26,22 +27,7 @@ public class OrderEntity {
     private String imageUrl;
     private Date lastNotifyTime;
 
-    public static ConverterImpl getConverter() {
-        return new ConverterImpl();
-    }
-
-    public static class ConverterImpl extends Converter<OrderEntity, OrderDTO> {
-
-        @Override
-        public OrderDTO doForward(OrderEntity orderEntity) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public OrderEntity doBackward(OrderDTO orderDTO) {
-            OrderEntity orderEntity = new OrderEntity();
-            BeanUtils.copyProperties(orderDTO, orderEntity);
-            return orderEntity;
-        }
+    public static BeanConverter<OrderEntity, OrderDTO> getConverter() {
+        return new BeanConverter<>(OrderEntity.class, OrderDTO.class);
     }
 }

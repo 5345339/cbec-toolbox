@@ -13,4 +13,8 @@ public interface PlatformAccountApi {
 
     @GetMapping("/list_all_user_platform_account")
     List<PlatformAccountDTO> listAllUserPlatformAccount();
+
+    @GetMapping("/get_user_platform_account")
+    PlatformAccountDTO getUserPlatformAccount(@RequestParam("userName") String userName,
+                                              @RequestParam("platformAccount") String platformAccount);
 }

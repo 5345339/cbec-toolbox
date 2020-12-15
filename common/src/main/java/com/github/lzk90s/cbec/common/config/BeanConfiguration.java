@@ -8,4 +8,9 @@ public class BeanConfiguration {
     public RestAdviceHandler restExceptionAdvice() {
         return new RestAdviceHandler();
     }
+
+    @Bean
+    public FeignErrorDecoder feignExceptionErrorDecoder() {
+        return new FeignErrorDecoder();
+    }
 }

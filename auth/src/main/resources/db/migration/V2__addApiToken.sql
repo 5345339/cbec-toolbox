@@ -1,0 +1,1 @@
+alter table `t_platform_account` add column `api_token` varchar(256) default '';

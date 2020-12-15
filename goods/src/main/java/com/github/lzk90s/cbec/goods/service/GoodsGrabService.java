@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class SpiderService {
+public class GoodsGrabService {
     @Value("${maxGoodsNum:500}")
     private int maxGoodsNum;
     @Value("${defaultSort:most-popular}")
@@ -38,7 +38,7 @@ public class SpiderService {
     @Autowired
     private GoodsSupplierService goodsSupplierService;
 
-    public SpiderService() {
+    public GoodsGrabService() {
         System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "8");
     }
 

@@ -263,7 +263,7 @@ export default {
       this.listGoods(params);
     },
     listCategory(platform) {
-      getList("/api/goods/goods/list_all_category/" + platform,
+      getList("/api/goods/goods_select/list_all_category/" + platform,
         {},
         (total, data) => {
           this.categoryList = data;
@@ -274,7 +274,7 @@ export default {
     },
     listGoods(params) {
       this.loading = true;
-      getList("/api/goods/goods/list_category_goods",
+      getList("/api/goods/goods_select/list_category_goods",
         params,
         (total, data) => {
           this.loading = false;
@@ -298,7 +298,7 @@ export default {
         });
     },
     listGoodsSupplier(goodsId, idx) {
-      getList(`/api/goods/goods/list_goods_supplier/${goodsId}`,
+      getList(`/api/goods/goods_select/list_goods_supplier/${goodsId}`,
         {},
         (total, data) => {
           if (total >= 1) {

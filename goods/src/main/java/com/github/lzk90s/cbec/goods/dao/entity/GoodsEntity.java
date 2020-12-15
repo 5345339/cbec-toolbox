@@ -3,6 +3,7 @@ package com.github.lzk90s.cbec.goods.dao.entity;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.IdType;
+import com.github.lzk90s.cbec.common.bean.BeanConverter;
 import com.github.lzk90s.cbec.internal.api.spider.GoodsInfoDTO;
 import com.google.common.base.Converter;
 import lombok.Data;
@@ -24,22 +25,7 @@ public class GoodsEntity {
     private Boolean purchased;
 
 
-    public static ConverterImpl getConverter() {
-        return new ConverterImpl();
-    }
-
-    public static class ConverterImpl extends Converter<GoodsInfoDTO, GoodsEntity> {
-
-        @Override
-        public GoodsEntity doForward(GoodsInfoDTO goodsInfoDTO) {
-            GoodsEntity goodsEntity = new GoodsEntity();
-            BeanUtils.copyProperties(goodsInfoDTO, goodsEntity);
-            return goodsEntity;
-        }
-
-        @Override
-        public GoodsInfoDTO doBackward(GoodsEntity goodsEntity) {
-            throw new UnsupportedOperationException();
-        }
+    public static BeanConverter<GoodsInfoDTO, GoodsEntity> getConverter() {
+        return new BeanConverter<>(GoodsInfoDTO.class, GoodsEntity.class);
     }
 }
