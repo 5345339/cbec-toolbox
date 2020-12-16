@@ -7,20 +7,20 @@ from common import exception
 from ecommerce.ali1688 import ali1688
 from ecommerce.vova import vova
 from ecommerce.vova import vova_merchant_rest
-from util import json_util
+from model import product_model
+from util import json_util, dict_util
 
 goods = Blueprint('goods', __name__)
 
 
 def response_json_data(response):
-    return Response(response, mimetype='application/json')
+    assert not isinstance(response, str)
+    return Response(json_util.obj2json(response), mimetype='application/json')
 
 
 @goods.route('/list_all_category/<platform>', methods=['GET'])
 def list_all_category(platform):
-    category_list = vova.get_all_category()
-    response = json_util.obj2json(category_list)
-    return response_json_data(response)
+    return response_json_data(vova.get_all_category())
 
 
 @goods.route('/list_category_goods/<platform>', methods=['GET'])
@@ -40,12 +40,12 @@ def list_category_goods(platform):
         raise exception.BizException("无效的类目")
 
     start_time = datetime.datetime.now()
-    response = json_util.obj2json(vova.get_category_goods(category_info, sort, cursor))
+    goods = vova.get_category_goods(category_info, sort, cursor)
     end_time = datetime.datetime.now()
 
     logging.info("list_category_goods cost {}(s)".format((end_time - start_time).seconds))
 
-    return response_json_data(response)
+    return response_json_data(goods)
 
 
 @goods.route('/search_goods_by_image', methods=['GET'])
@@ -60,12 +60,12 @@ def search_goods_by_image():
         num = 5
 
     start_time = datetime.datetime.now()
-    response = json_util.obj2json(ali1688.search_goods_by_image(image_url, float(max_price), int(num)))
+    goods = ali1688.search_goods_by_image(image_url, float(max_price), int(num))
     end_time = datetime.datetime.now()
 
     logging.info("search_goods_by_image cost {}(s)".format((end_time - start_time).seconds))
 
-    return response_json_data(response)
+    return response_json_data(goods)
 
 
 @goods.route('/sync_product/<platform>', methods=['GET'])
@@ -76,13 +76,22 @@ def sync_product(platform):
     if not api_token or not start_time or not end_time:
         raise ValueError("Invalid params")
 
-    response = json_util.obj2json(vova_merchant_rest.get_product_list(api_token, start_time, end_time))
-    return response_json_data(response)
+    return response_json_data(vova_merchant_rest.get_product_list(api_token, start_time, end_time))
 
 
 @goods.route('/upload_product/<platform>', methods=['POST'])
 def upload_product(platform):
     api_token = request.args.get("apiToken")
+    product_list = request.json
+    if not product_list:
+        raise ValueError("No product")
+
+    product_list_dto = []
+    for product in product_list:
+        product_list_dto.extend(product_model.UploadProductDto.from_product(dict_util.dict2obj(product)))
+
+    upload_id = vova_merchant_rest.upload_product(api_token, product_list_dto)
+    return Response(upload_id)
 
 
 @goods.route('/upload_status/<platform>', methods=['GET'])
@@ -92,7 +101,18 @@ def get_upload_status(platform):
     if not api_token or not upload_id:
         raise ValueError("Invalid params")
 
-    vova_merchant_rest.get_upload_status_by_batch_id(api_token, upload_id)
+    return response_json_data(vova_merchant_rest.get_upload_status_by_batch_id(api_token, upload_id))
+
+
+@goods.route('/enable_product_sale/<platform>', methods=['POST'])
+def enable_product_sale(platform):
+    api_token = request.args.get("apiToken")
+    product_list = request.json
+    if not product_list:
+        raise ValueError("No product")
+
+    vova_merchant_rest.enable_product_sale(api_token, product_list)
+    return Response()
 
 
 if __name__ == '__main__':

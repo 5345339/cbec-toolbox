@@ -41,14 +41,16 @@ create TABLE `t_product_sku`  (
   INDEX idx_product_id (`product_id`)
 ) ENGINE = InnoDB COMMENT = '商品SKU表';
 
-drop table IF EXISTS `t_product_upload`;
-create table `t_product_upload` (
-  `id` varchar(64) NOT NULL COMMENT '上传id',
+drop table IF EXISTS `t_upload_record`;
+create table `t_upload_record` (
+  `id` varchar(128) NOT NULL COMMENT 'id',
+  `upload_id` varchar(64) NOT NULL COMMENT '上传id',
   `platform_account` varchar(128) NOT NULL COMMENT '上传的目的平台帐号',
   `product_id` varchar(128) NOT NULL COMMENT '产品id',
   `status` varchar(128) NOT NULL COMMENT '上传状态',
   `message` varchar(4096) NOT NULL DEFAULT '' COMMENT '上传提示消息',
   `add_time` timestamp NOT NULL DEFAULT current_timestamp() COMMENT '添加时间',
   `update_time` timestamp NOT NULL DEFAULT current_timestamp() ON update current_timestamp() COMMENT '更新时间',
-  UNIQUE KEY uk_id_product_id (`id`, `product_id`)
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY uk_platform_account_upload_id_product_id (`platform_account`, `upload_id`, `product_id`)
 ) ENGINE = InnoDB COMMENT = '商品上传信息表';

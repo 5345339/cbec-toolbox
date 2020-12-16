@@ -52,7 +52,7 @@ class UploadProductDto:
         self.style_color = style_color
         self.style_size = style_size
         self.goods_description = goods_description
-        self.price = shop_price
+        self.shop_price = shop_price
         self.shipping_fee = shipping_fee
         self.main_image = main_image
         self.shipping_weight = shipping_weight
@@ -71,11 +71,12 @@ class UploadProductDto:
                                    storage=999,
                                    style_color=sku.style_color,
                                    style_size=sku.style_size,
-                                   shop_price=sku.shop_price,
+                                   shop_price=sku.price,
                                    shipping_fee=sku.shipping_fee,
-                                   shipping_weight=300,
+                                   shipping_weight=sku.weight,
                                    main_image=product.main_image,
-                                   extra_image=sku.image_list[0],
-                                   extra_image_list=sku.extra_image_list)
+                                   extra_image=sku.image_url,
+                                   extra_image_list=[img.url for img in product.image_list
+                                                     if not img.main_image and not img.sku_image])
             dto_list.append(dto)
         return dto_list

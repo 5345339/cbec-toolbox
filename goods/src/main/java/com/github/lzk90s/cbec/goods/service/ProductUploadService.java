@@ -9,17 +9,21 @@ import com.github.lzk90s.cbec.goods.dao.entity.UploadRecordEntity;
 import com.github.lzk90s.cbec.goods.feign.GoodsSpiderApiFeign;
 import com.github.lzk90s.cbec.internal.api.auth.PlatformAccountDTO;
 import com.github.lzk90s.cbec.internal.api.spider.ProductDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProductUploadService {
+
     @Value("${maxUploadSkuPerTime:300}")
     private int maxUploadSkuPerTime;
     @Autowired
@@ -33,6 +37,7 @@ public class ProductUploadService {
     @Autowired
     private UploadRecordService uploadRecordService;
 
+    @Transactional(rollbackFor = Exception.class)
     public void upload(PlatformAccountDTO platformAccount, List<String> productIdList) {
         var productList = productIdList.stream().map(id -> {
             ProductDTO dto = ProductEntity.getConverter().doForward(productService.selectById(id));
@@ -60,24 +65,71 @@ public class ProductUploadService {
 
         var uploadRecordList = productIdList.stream().map(id -> {
             var entity = new UploadRecordEntity();
+            entity.buildId(platformAccount.getPlatformUser(), uploadId, id);
             entity.setProductId(id);
-            entity.setId(uploadId);
+            entity.setPlatformAccount(platformAccount.getPlatformUser());
+            entity.setStatus(UploadStatusEnum.PREPARE.getStatus());
+            entity.setUploadId(uploadId);
             return entity;
         }).collect(Collectors.toList());
         uploadRecordService.insertBatch(uploadRecordList);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void checkUploadStatus(PlatformAccountDTO platformAccount) {
-        var uploadList = uploadRecordService.selectList(new EntityWrapper<UploadRecordEntity>()
+        var uploadIdList = uploadRecordService.selectList(new EntityWrapper<UploadRecordEntity>()
                 .eq("platform_account", platformAccount.getPlatformUser())
-                .groupBy("id"));
-        if (CollectionUtils.isEmpty(uploadList)) {
+                .groupBy("upload_id"))
+                .stream()
+                .map(UploadRecordEntity::getUploadId)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(uploadIdList)) {
             return;
         }
-        uploadList.forEach(uploadRecord -> {
+
+        uploadIdList.forEach(r -> {
             var statusDTO = goodsSpiderApiFeign.getUploadStatus(platformAccount.getPlatform(),
-                    platformAccount.getApiToken(), uploadRecord.getId());
-            uploadRecordService.insertOrUpdate(UploadRecordEntity.getConverter().doBackward(statusDTO));
+                    platformAccount.getApiToken(), r);
+            if (null != statusDTO) {
+                var entity = new UploadRecordEntity();
+                entity.setStatus(statusDTO.getStatus());
+                entity.setMessage(statusDTO.getMessage());
+                uploadRecordService.update(entity, new EntityWrapper<UploadRecordEntity>()
+                        .eq("platform_account", platformAccount.getPlatformUser())
+                        .eq("upload_id", r)
+                        .in("product_id", statusDTO.getProductList()));
+            }
         });
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void enableProductSale(PlatformAccountDTO platformAccount) {
+        var uploadedProductList = uploadRecordService.selectList(new EntityWrapper<UploadRecordEntity>()
+                .eq("platform_account", platformAccount.getPlatformUser())
+                .eq("status", UploadStatusEnum.UPLOADED.getStatus()));
+        if (CollectionUtils.isEmpty(uploadedProductList)) {
+            log.warn("No product need to enable sale");
+            return;
+        }
+
+        String status;
+        String message;
+
+        try{
+            goodsSpiderApiFeign.enableProductSale(platformAccount.getPlatform(), platformAccount.getApiToken(),
+                    uploadedProductList.stream().map(UploadRecordEntity::getProductId).collect(Collectors.toList()));
+            status = UploadStatusEnum.IN_SALE.getStatus();
+            message = "已上架";
+        }catch (Exception e){
+            status = null;
+            message = e.getMessage();
+        }
+
+        String finalStatus = status;
+        String finalMessage = message;
+        uploadRecordService.updateBatchById(uploadedProductList.stream()
+                .peek(s -> s.setStatus(finalStatus))
+                .peek(s -> s.setMessage(finalMessage))
+                .collect(Collectors.toList()));
     }
 }

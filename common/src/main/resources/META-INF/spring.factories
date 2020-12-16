@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-BeanConfiguration
+com.github.lzk90s.cbec.common.config.BeanConfiguration

@@ -49,7 +49,7 @@ mybatis-plus:
     refresh-mapper: true
     id-type: 0
 
-task:
+tasks:
   goodsSpiderTask:
     enable: true
   productUploadStatusTask:

@@ -3,8 +3,6 @@ package com.github.lzk90s.cbec.common.bean;
 import com.google.common.base.Converter;
 import org.springframework.beans.BeanUtils;
 
-import java.lang.reflect.*;
-
 public class BeanConverter<A1, A2> extends Converter<A1, A2> {
     private Class<A1> a1Class;
     private Class<A2> a2Class;

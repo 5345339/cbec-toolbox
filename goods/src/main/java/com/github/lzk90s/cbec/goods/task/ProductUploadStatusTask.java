@@ -28,17 +28,18 @@ public class ProductUploadStatusTask {
     private PlatformAccountApiFeign platformAccountApiFeign;
 
     @GetMapping("/execute")
-    @Scheduled(fixedDelay = 5 * 60 * 60 * 1000)
+    @Scheduled(fixedDelay = 5 * 60 * 1000)
     public void execute() {
         log.info("Execute product upload status task");
         checkUploadStatus();
     }
 
     void checkUploadStatus() {
-        var accountList = platformAccountApiFeign.listPlatformAccountByUser(UserUtil.getUserName());
+        var accountList = platformAccountApiFeign.listAllUserPlatformAccount();
         if (CollectionUtils.isEmpty(accountList)) {
             return;
         }
         accountList.forEach(account -> productUploadService.checkUploadStatus(account));
+        accountList.forEach(account -> productUploadService.enableProductSale(account));
     }
 }

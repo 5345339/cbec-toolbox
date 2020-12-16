@@ -65,7 +65,7 @@ def get_product_image(token, product_id):
             is_main_img_str = img['main_img']
             if 'N' == is_main_img_str:
                 is_main_img = False
-            is_sku_image=True
+            is_sku_image = True
             if not goods_sku_list:
                 is_sku_image = False
             img_list_obj.append(product_model.ProductImage(img_id, img_url, goods_sku_list, is_main_img, is_sku_image))
@@ -184,7 +184,6 @@ def get_product_list_by_page(token, start_time, end_time, page=1, per_page=100):
                                                       goods_description, parent_sku, sku_obj_list, product_image_list))
 
         logging.info("[{}%] Process product {} - {}".format(complete_ratio, product_id, goods_name))
-        break
 
     return total_page, product_list_obj
 
@@ -257,12 +256,39 @@ def get_upload_status_by_batch_id(token, upload_batch_id):
 
     status = response_dict["code"]
     message = response_dict["message"]
-    succeed_product_list = response_dict["data"]
     product_id_list = []
-    if succeed_product_list:
-        product_id_list.extend([p["product_id"] for p in succeed_product_list])
+
+    if 'success' == status:
+        status = 'uploaded'
+        succeed_product_list = response_dict["data"]
+        if succeed_product_list:
+            product_id_list.extend([p["product_id"] for p in succeed_product_list])
+    else:
+        status = 'prepare'
 
     return product_model.UploadStatus(status, message, product_id_list)
+
+
+def enable_product_sale(token, product_id_list):
+    uri = "/product/enableSale"
+
+    params = {
+        "token": token,
+        "goods_list": product_id_list,
+    }
+
+    response = requests.post(build_url(uri), headers=json_header(), data=obj2json(params))
+    check_response(response)
+
+    response_dict = json2dict(response.text)
+    response_data = response_dict["data"]
+
+    code = response_data["code"]
+    if code != _SUCCESS_CODE:
+        message = response_data["message"]
+        errors_list = response_data["errors_list"]
+        message = message + "; => " + obj2json(errors_list)
+        raise exception.BizException(message)
 
 
 def delete_product(token, product_id_list):

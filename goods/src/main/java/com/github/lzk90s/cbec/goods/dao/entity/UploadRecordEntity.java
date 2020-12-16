@@ -1,20 +1,22 @@
 package com.github.lzk90s.cbec.goods.dao.entity;
 
+import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
-import com.github.lzk90s.cbec.common.bean.BeanConverter;
-import com.github.lzk90s.cbec.internal.api.spider.UploadStatusDTO;
+import com.baomidou.mybatisplus.enums.IdType;
 import lombok.Data;
 
 @Data
 @TableName("t_upload_record")
 public class UploadRecordEntity {
+    @TableId(type = IdType.INPUT)
     private String id;
+    private String uploadId;
     private String platformAccount;
     private String productId;
     private String status;
     private String message;
 
-    public static BeanConverter<UploadRecordEntity, UploadStatusDTO> getConverter(){
-        return new BeanConverter<>(UploadRecordEntity.class, UploadStatusDTO.class);
+    public void buildId(String platformAccount, String uploadId, String productId) {
+        id = platformAccount + "_" + uploadId + "_" + productId;
     }
 }

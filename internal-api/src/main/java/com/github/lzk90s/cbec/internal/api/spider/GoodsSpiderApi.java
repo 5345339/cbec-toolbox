@@ -35,4 +35,9 @@ public interface GoodsSpiderApi {
     UploadStatusDTO getUploadStatus(@PathVariable("platform") String platform,
                                     @RequestParam("apiToken") String apiToken,
                                     @RequestParam("uploadId") String uploadId);
+
+    @PostMapping("/enable_product_sale/{platform}")
+    void enableProductSale(@PathVariable("platform") String platform,
+                           @RequestParam("apiToken") String apiToken,
+                           @RequestBody List<String> productIdList);
 }
