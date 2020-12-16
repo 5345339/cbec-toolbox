@@ -68,11 +68,11 @@ export default {
           index: "select-goods",
           path: "/cbec/select-goods",
         },
-        // {
-        //   name: "地址管理",
-        //   index: "address-manage",
-        //   path: "/cbec/address-manage"
-        // }
+        {
+          name: "产品管理",
+          index: "product-manage",
+          path: "/cbec/product-manage"
+        }
       ],
       crumbs: this.buildCrumbs(this.$route.path),
     };

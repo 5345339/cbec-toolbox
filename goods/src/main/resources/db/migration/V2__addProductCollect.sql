@@ -4,7 +4,7 @@ create TABLE `t_product`  (
   `platform_account` varchar(128) NOT NULL COMMENT '平台账户',
   `cat_id` varchar(128) NOT NULL COMMENT '分类id',
   `name` varchar(512) NOT NULL COMMENT '名称',
-  `description` varchar(512) NOT NULL COMMENT '描述',
+  `description` text(8192) NOT NULL COMMENT '描述',
   `main_image` varchar(1024) NOT NULL COMMENT '主图',
   `parent_sku` varchar(128) NOT NULL COMMENT '父sku',
   `add_time` timestamp NOT NULL DEFAULT current_timestamp() COMMENT '添加时间',

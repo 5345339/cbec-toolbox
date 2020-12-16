@@ -32,8 +32,16 @@ security:
       user-info-uri: http://auth/user
 
 ribbon:
-  ReadTimeout: 60000
+  ReadTimeout: 10000
   ConnectTimeout: 10000
+
+feign:
+  client:
+    config:
+      #spider feign timeout
+      goodsSpiderFeign:
+        ConnectTimeout: 3000
+        ReadTimeout: 1800000
 
 mybatis-plus:
   configuration:

@@ -38,6 +38,13 @@ const routes = [
         },
         component: () => import("@/page/cbec/SelectGoods"),
       },
+      {
+        path: "product-manage",
+        meta: {
+          key: "product-manage",
+        },
+        component: () => import("@/page/cbec/ProductManage"),
+      },
     ],
   },
   {

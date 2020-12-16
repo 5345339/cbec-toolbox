@@ -118,7 +118,8 @@ def get_product_list_by_page(token, start_time, end_time, page=1, per_page=100):
     total_page = int(page_arr["totalPage"])
     total_amount = int(page_arr["totalAmount"])
 
-    logging.info("Total page {} and total num {} between {}-{}".format(total_page, total_amount, start_time, end_time))
+    logging.info("Total page {} and total num {} between {}-{}, current page {}"
+                 .format(total_page, total_amount, start_time, end_time, page))
 
     if page > total_page:
         # logging.error("Page {} greater than total {}".format(page, total_page))
@@ -233,9 +234,10 @@ def upload_product(token, product_list_dto):
         if response_data["code"] == _PRODUCT_ALREADY_EXIST_ERROR_CODE:
             logging.warning("Product already exist, ignore")
         else:
-            errs = response_data["errors_list"]
-            raise exception.BizException("Failed to add upload product, {}, {}".format(response_data["message"],
-                                                                                       obj2json(errs)))
+            errs = response_data["message"]
+            if "error_list" in response_data:
+                errs = errs + "; " + obj2json(response_data["errors_list"])
+            raise exception.BizException("Failed to upload product, {}".format(errs))
 
     return response_data["upload_batch_id"]
 
