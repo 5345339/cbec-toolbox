@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class ProductUploadService {
-
     @Value("${maxUploadSkuPerTime:300}")
     private int maxUploadSkuPerTime;
     @Autowired
@@ -39,18 +38,26 @@ public class ProductUploadService {
 
     @Transactional(rollbackFor = Exception.class)
     public void upload(PlatformAccountDTO platformAccount, List<String> productIdList) {
-        var productList = productIdList.stream().map(id -> {
-            ProductDTO dto = ProductEntity.getConverter().doForward(productService.selectById(id));
-            dto.setSkuList(productSkuService.selectList(new EntityWrapper<ProductSkuEntity>()
-                    .eq("product_id", id)).stream()
-                    .map(sku -> ProductSkuEntity.getConverter().doForward(sku))
-                    .collect(Collectors.toList()));
-            dto.setImageList(productResourceService.selectList(new EntityWrapper<ProductResourceEntity>()
-                    .eq("product_id", id)).stream()
-                    .map(img -> ProductResourceEntity.getConverter().doForward(img))
-                    .collect(Collectors.toList()));
-            return dto;
-        }).collect(Collectors.toList());
+        var productList = productIdList.stream()
+                .filter(productId -> {
+                    // 过滤掉已经上传过的
+                    int count = uploadRecordService.selectCount(new EntityWrapper<UploadRecordEntity>().eq("platform_account",
+                            platformAccount.getPlatformUser()).eq("original_product_id", productId));
+                    return count == 0;
+                })
+                .map(productId -> {
+                    ProductDTO dto = ProductEntity.getConverter().doForward(productService.selectById(productId));
+                    dto.setSkuList(productSkuService.selectList(new EntityWrapper<ProductSkuEntity>()
+                            .eq("product_id", productId)).stream()
+                            .map(sku -> ProductSkuEntity.getConverter().doForward(sku))
+                            .collect(Collectors.toList()));
+                    dto.setImageList(productResourceService.selectList(new EntityWrapper<ProductResourceEntity>()
+                            .eq("product_id", productId)).stream()
+                            .map(img -> ProductResourceEntity.getConverter().doForward(img))
+                            .collect(Collectors.toList()));
+                    return dto;
+                })
+                .collect(Collectors.toList());
 
         int skuNum = productList.stream().mapToInt(s -> s.getSkuList().size()).sum();
         if (skuNum > maxUploadSkuPerTime) {
@@ -63,15 +70,15 @@ public class ProductUploadService {
             throw new BizException("上传id为空");
         }
 
-        var uploadRecordList = productIdList.stream().map(id -> {
-            var entity = new UploadRecordEntity();
-            entity.buildId(platformAccount.getPlatformUser(), uploadId, id);
-            entity.setProductId(id);
-            entity.setPlatformAccount(platformAccount.getPlatformUser());
-            entity.setStatus(UploadStatusEnum.PREPARE.getStatus());
-            entity.setUploadId(uploadId);
-            return entity;
-        }).collect(Collectors.toList());
+        var uploadRecordList = productList.stream()
+                .map(product -> UploadRecordEntity.builder()
+                        .originalProductId(product.getId())
+                        .originalParentSku(product.getParentSku())
+                        .platformAccount(platformAccount.getPlatformUser())
+                        .status(UploadStatusEnum.PREPARE.getStatus())
+                        .uploadId(uploadId)
+                        .build())
+                .collect(Collectors.toList());
         uploadRecordService.insertBatch(uploadRecordList);
     }
 
@@ -90,15 +97,22 @@ public class ProductUploadService {
         uploadIdList.forEach(r -> {
             var statusDTO = goodsSpiderApiFeign.getUploadStatus(platformAccount.getPlatform(),
                     platformAccount.getApiToken(), r);
-            if (null != statusDTO) {
-                var entity = new UploadRecordEntity();
-                entity.setStatus(statusDTO.getStatus());
-                entity.setMessage(statusDTO.getMessage());
-                uploadRecordService.update(entity, new EntityWrapper<UploadRecordEntity>()
-                        .eq("platform_account", platformAccount.getPlatformUser())
-                        .eq("upload_id", r)
-                        .in("product_id", statusDTO.getProductList()));
+            if (null == statusDTO || CollectionUtils.isEmpty(statusDTO.getProductList())) {
+                return;
             }
+
+            statusDTO.getProductList().stream()
+                    .map(s -> UploadRecordEntity.builder()
+                            .status(statusDTO.getStatus())
+                            .message(statusDTO.getMessage())
+                            .newProductId(s.getProductId())
+                            .originalParentSku(s.getParentSku()) // parent sku is same as original parent sku
+                            .build())
+                    .forEach(s -> uploadRecordService.update(s, new EntityWrapper<UploadRecordEntity>()
+                            .eq("platform_account", platformAccount.getPlatformUser())
+                            .eq("upload_id", r)
+                            .eq("original_product_id", s.getOriginalProductId())
+                            .eq("original_parent_sku", s.getOriginalParentSku())));
         });
     }
 
@@ -115,12 +129,12 @@ public class ProductUploadService {
         String status;
         String message;
 
-        try{
+        try {
             goodsSpiderApiFeign.enableProductSale(platformAccount.getPlatform(), platformAccount.getApiToken(),
-                    uploadedProductList.stream().map(UploadRecordEntity::getProductId).collect(Collectors.toList()));
+                    uploadedProductList.stream().map(UploadRecordEntity::getNewProductId).collect(Collectors.toList()));
             status = UploadStatusEnum.IN_SALE.getStatus();
             message = "已上架";
-        }catch (Exception e){
+        } catch (Exception e) {
             status = null;
             message = e.getMessage();
         }

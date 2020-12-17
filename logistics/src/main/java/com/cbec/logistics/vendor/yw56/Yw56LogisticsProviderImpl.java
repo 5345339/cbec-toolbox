@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @EnableConfigurationProperties(Yw56Properties.class)
-@ConditionalOnProperty(prefix = "com.github.lzk90s.trade.logistics.yw56", name = "enable", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "com.trade.logistics.yw56", name = "enable", havingValue = "true", matchIfMissing = true)
 @Component
 public class Yw56LogisticsProviderImpl implements LogisticsProvider {
     private static final String DEFAULT_TYPE_LIST = "1,2,3,4";

@@ -94,7 +94,7 @@ def upload_product(platform):
     return Response(upload_id)
 
 
-@goods.route('/upload_status/<platform>', methods=['GET'])
+@goods.route('/get_upload_status/<platform>', methods=['GET'])
 def get_upload_status(platform):
     api_token = request.args.get("apiToken")
     upload_id = request.args.get("uploadId")
@@ -112,6 +112,17 @@ def enable_product_sale(platform):
         raise ValueError("No product")
 
     vova_merchant_rest.enable_product_sale(api_token, product_list)
+    return Response()
+
+
+@goods.route('/delete_product/<platform>', methods=['DELETE'])
+def delete_product(platform):
+    api_token = request.args.get("apiToken")
+    product_list = request.json
+    if not product_list:
+        raise ValueError("No product")
+
+    vova_merchant_rest.delete_product(api_token, product_list)
     return Response()
 
 

@@ -31,13 +31,18 @@ public interface GoodsSpiderApi {
                          @RequestParam("apiToken") String apiToken,
                          @RequestBody List<ProductDTO> productDTOList);
 
-    @GetMapping("/upload_status/{platform}")
+    @GetMapping("/get_upload_status/{platform}")
     UploadStatusDTO getUploadStatus(@PathVariable("platform") String platform,
                                     @RequestParam("apiToken") String apiToken,
                                     @RequestParam("uploadId") String uploadId);
 
     @PostMapping("/enable_product_sale/{platform}")
     void enableProductSale(@PathVariable("platform") String platform,
+                           @RequestParam("apiToken") String apiToken,
+                           @RequestBody List<String> productIdList);
+
+    @PostMapping("/delete_product/{platform}")
+    void deleteProduct(@PathVariable("platform") String platform,
                            @RequestParam("apiToken") String apiToken,
                            @RequestBody List<String> productIdList);
 }

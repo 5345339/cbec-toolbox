@@ -20,7 +20,7 @@ public class GoodsSpiderTask {
     private GoodsGrabService goodsGrabService;
 
     @GetMapping("/execute")
-    @Scheduled(fixedDelay = 30*60*1000)
+    @Scheduled(fixedDelay = 30 * 60 * 1000)
     public void execute() {
         log.info("Execute goods spider task");
         goodsGrabService.grabGoods();

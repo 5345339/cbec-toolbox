@@ -18,13 +18,13 @@ public enum UploadStatusEnum {
      */
     NOT_IN_SALE("not_in_sale");
 
-    UploadStatusEnum(String status){
+    private final String status;
+
+    UploadStatusEnum(String status) {
         this.status = status;
     }
 
-    String getStatus(){
+    String getStatus() {
         return this.status;
     }
-
-    private final String status;
 }

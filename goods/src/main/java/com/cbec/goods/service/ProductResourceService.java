@@ -6,5 +6,5 @@ import com.cbec.goods.dao.mapper.ProductResourceMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ProductResourceService  extends ServiceImpl<ProductResourceMapper, ProductResourceEntity> {
+public class ProductResourceService extends ServiceImpl<ProductResourceMapper, ProductResourceEntity> {
 }

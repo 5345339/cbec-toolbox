@@ -95,7 +95,7 @@ public class GoodsGrabService {
             var goodsList = scrollResult.getResults().stream()
                     .filter(goods -> !hasGraped(goods.getId()))
                     .collect(Collectors.toList());
-            if (CollectionUtils.isEmpty(goodsList)){
+            if (CollectionUtils.isEmpty(goodsList)) {
                 continue;
             }
 

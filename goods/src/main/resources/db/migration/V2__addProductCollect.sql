@@ -43,14 +43,14 @@ create TABLE `t_product_sku`  (
 
 drop table IF EXISTS `t_upload_record`;
 create table `t_upload_record` (
-  `id` varchar(128) NOT NULL COMMENT 'id',
   `upload_id` varchar(64) NOT NULL COMMENT '上传id',
   `platform_account` varchar(128) NOT NULL COMMENT '上传的目的平台帐号',
-  `product_id` varchar(128) NOT NULL COMMENT '产品id',
+  `original_product_id` varchar(128) NOT NULL COMMENT '原始产品id',
+  `original_parent_sku` varchar(128) NOT NULL COMMENT '原始parent sku',
+  `new_product_id` varchar(128) NOT NULL DEFAULT '' COMMENT '上传后新的产品id',
   `status` varchar(128) NOT NULL COMMENT '上传状态',
   `message` varchar(4096) NOT NULL DEFAULT '' COMMENT '上传提示消息',
   `add_time` timestamp NOT NULL DEFAULT current_timestamp() COMMENT '添加时间',
   `update_time` timestamp NOT NULL DEFAULT current_timestamp() ON update current_timestamp() COMMENT '更新时间',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY uk_platform_account_upload_id_product_id (`platform_account`, `upload_id`, `product_id`)
+  UNIQUE KEY uk_upload_record (`platform_account`, `upload_id`, `original_product_id`)
 ) ENGINE = InnoDB COMMENT = '商品上传信息表';

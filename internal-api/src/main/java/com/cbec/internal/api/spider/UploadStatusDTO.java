@@ -10,5 +10,13 @@ public class UploadStatusDTO {
     private String status;
     private String message;
     @JsonProperty("product_list")
-    private List<String> productList;
+    private List<UploadResult> productList;
+
+    @Data
+    public static class UploadResult{
+        @JsonProperty("product_id")
+        private String productId;
+        @JsonProperty("parent_sku")
+        private String parentSku;
+    }
 }

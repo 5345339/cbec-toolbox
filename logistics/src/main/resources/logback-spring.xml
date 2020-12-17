@@ -1,5 +1,5 @@
 <configuration>
-    <springProperty scope="context" name="logDir" source="logging.dir" defaultValue="/var/log/trade"/>
+    <springProperty scope="context" name="logDir" source="logging.dir" defaultValue="/var/log/cbec"/>
     <springProperty scope="context" name="program" source="spring.application.name" defaultValue="localhost"/>
 
     <property name="PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread%X{sourceThread}]%logger{24} - %msg%n"/>
@@ -59,7 +59,7 @@
 
     <logger name="org.springframework.web.servlet.mvc" level="info"/>
 
-    <logger name="com.github.lzk90s.cbec.logistics.dao" level="debug">
+    <logger name="com.cbec.logistics.dao" level="debug">
         <appender-ref ref="SQL"/>
     </logger>
 

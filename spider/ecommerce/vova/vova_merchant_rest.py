@@ -264,7 +264,7 @@ def get_upload_status_by_batch_id(token, upload_batch_id):
         status = 'uploaded'
         succeed_product_list = response_dict["data"]
         if succeed_product_list:
-            product_id_list.extend([p["product_id"] for p in succeed_product_list])
+            product_id_list.extend([{p["product_id"], p['parent_sku']} for p in succeed_product_list])
     else:
         status = 'prepare'
 

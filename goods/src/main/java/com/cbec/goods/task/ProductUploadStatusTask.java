@@ -39,6 +39,6 @@ public class ProductUploadStatusTask {
             return;
         }
         accountList.forEach(account -> productUploadService.checkUploadStatus(account));
-        accountList.forEach(account -> productUploadService.enableProductSale(account));
+        // accountList.forEach(account -> productUploadService.enableProductSale(account));
     }
 }

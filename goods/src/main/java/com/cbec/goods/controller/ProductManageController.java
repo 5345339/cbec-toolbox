@@ -40,7 +40,7 @@ public class ProductManageController {
     private ProductService productService;
 
     @GetMapping("/sync_product")
-    public Result syncProduct(@RequestParam String platformAccount,
+    public Result<Void> syncProduct(@RequestParam String platformAccount,
                               @RequestParam(required = false, defaultValue = "2000-01-01 00:00:00") String startTime,
                               @RequestParam(required = false) String endTime) {
         var account = platformAccountApiFeign.getUserPlatformAccount(UserUtil.getUserName(), platformAccount);
@@ -56,9 +56,9 @@ public class ProductManageController {
 
     @GetMapping("/list_product")
     public Result<List<ProductEntity>> listProduct(@RequestParam(defaultValue = "1") Integer pageNo,
-                                                   @RequestParam(defaultValue = "100") Integer pageSize){
+                                                   @RequestParam(defaultValue = "100") Integer pageSize) {
         var accountList = platformAccountApiFeign.listPlatformAccountByUser(UserUtil.getUserName());
-        if (CollectionUtils.isEmpty(accountList)){
+        if (CollectionUtils.isEmpty(accountList)) {
             return Result.ok();
         }
 
@@ -69,7 +69,7 @@ public class ProductManageController {
     }
 
     @PostMapping("/upload_product")
-    public Result uploadProduct(@RequestBody @Validated UploadProductOption option) {
+    public Result<Void> uploadProduct(@RequestBody @Validated UploadProductOption option) {
         var account = platformAccountApiFeign.getUserPlatformAccount(UserUtil.getUserName(),
                 option.getDstPlatformAccount());
         if (null == account) {

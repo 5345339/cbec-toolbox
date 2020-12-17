@@ -50,7 +50,7 @@ public class ProductSkuEntity {
      */
     private Float weight;
 
-    public static BeanConverter<ProductSkuEntity, SkuDTO> getConverter(){
+    public static BeanConverter<ProductSkuEntity, SkuDTO> getConverter() {
         return new BeanConverter<>(ProductSkuEntity.class, SkuDTO.class);
     }
 }
