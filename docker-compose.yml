@@ -41,6 +41,7 @@ services:
       - toolbox
     environment:
       - MYSQL_ROOT_PASSWORD
+      - INIT_DATABASES=auth,goods,logistics,order
     depends_on:
       - mysql
     volumes:
