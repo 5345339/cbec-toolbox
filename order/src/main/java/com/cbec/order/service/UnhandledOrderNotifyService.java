@@ -64,6 +64,9 @@ public class UnhandledOrderNotifyService {
         var orderList = orderSpiderApiFeign.listUnhandledOrder(account.getPlatform(),
                 account.getPlatformUser(), account.getPlatformPassword());
         if (CollectionUtils.isEmpty(orderList)) {
+            orderService.delete(new EntityWrapper<OrderEntity>()
+                    .eq("user", account.getUser())
+                    .eq("platform_account", account.getPlatformUser()));
             return;
         }
 
