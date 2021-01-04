@@ -90,7 +90,7 @@ public class UnhandledOrderNotifyService {
         String user = platformAccountDTO.getUser();
         String platformAccount = platformAccountDTO.getPlatformUser();
 
-        if (!hasUnNotifyOrder(user)) {
+        if (!hasUnNotifyOrder(user, platformAccount)) {
             return;
         }
 
@@ -117,16 +117,11 @@ public class UnhandledOrderNotifyService {
         orderService.updateBatchById(newOrderList);
     }
 
-    private boolean hasUnNotifyOrder(String user) {
+    private boolean hasUnNotifyOrder(String user, String platformAccount) {
         return orderService.selectCount(new EntityWrapper<OrderEntity>()
-                .eq("user", user).isNull("last_notify_time")) > 0;
-    }
-
-    private Date getTimeBeforeNow(int hour) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        calendar.set(Calendar.HOUR, calendar.get(Calendar.HOUR) - hour);
-        return calendar.getTime();
+                .eq("user", user)
+                .eq("platform_account", platformAccount)
+                .isNull("last_notify_time")) > 0;
     }
 
     private String buildNotifyMessage(String user, String platformAccount, List<OrderEntity> orderDTOList) {

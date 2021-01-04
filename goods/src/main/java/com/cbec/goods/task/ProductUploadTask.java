@@ -112,7 +112,9 @@ public class ProductUploadTask {
                 .eq("platform_account", srcPlatformAccount)
                 .between("add_time", startTime, endTime))
                 .stream()
-                .filter(s -> uploadRecordService.selectCount(new EntityWrapper<UploadRecordEntity>().eq("original_product_id", s.getId())) == 0)
+                .filter(s -> uploadRecordService.selectCount(new EntityWrapper<UploadRecordEntity>()
+                        .eq("original_product_id", s.getId())
+                        .eq("platform_account", dstPlatformAccount)) == 0)
                 .limit(maxUploadProductPerTime)
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(productList)) {
