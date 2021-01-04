@@ -60,5 +60,5 @@ mybatis-plus:
 tasks:
   goodsSpiderTask:
     enable: true
-  productUploadStatusTask:
+  productUploadTask:
     enable: true

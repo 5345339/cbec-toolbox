@@ -86,6 +86,7 @@ public class ProductUploadService {
     public void checkUploadStatus(PlatformAccountDTO platformAccount) {
         var uploadIdList = uploadRecordService.selectList(new EntityWrapper<UploadRecordEntity>()
                 .eq("platform_account", platformAccount.getPlatformUser())
+                .eq("status", UploadStatusEnum.PREPARE.getStatus())
                 .groupBy("upload_id"))
                 .stream()
                 .map(UploadRecordEntity::getUploadId)
@@ -111,7 +112,6 @@ public class ProductUploadService {
                     .forEach(s -> uploadRecordService.update(s, new EntityWrapper<UploadRecordEntity>()
                             .eq("platform_account", platformAccount.getPlatformUser())
                             .eq("upload_id", r)
-                            .eq("original_product_id", s.getOriginalProductId())
                             .eq("original_parent_sku", s.getOriginalParentSku())));
         });
     }
@@ -135,15 +135,20 @@ public class ProductUploadService {
             status = UploadStatusEnum.IN_SALE.getStatus();
             message = "已上架";
         } catch (Exception e) {
-            status = null;
+            status = UploadStatusEnum.NOT_IN_SALE.getStatus();
             message = e.getMessage();
         }
 
         String finalStatus = status;
         String finalMessage = message;
-        uploadRecordService.updateBatchById(uploadedProductList.stream()
-                .peek(s -> s.setStatus(finalStatus))
-                .peek(s -> s.setMessage(finalMessage))
-                .collect(Collectors.toList()));
+        uploadedProductList.forEach(s -> {
+            s.setStatus(finalStatus);
+            s.setMessage(finalMessage);
+            uploadRecordService.update(s, new EntityWrapper<UploadRecordEntity>()
+                    .eq("platform_account", s.getPlatformAccount())
+                    .eq("original_product_id", s.getOriginalProductId())
+                    .eq("upload_id", s.getUploadId()));
+        });
+
     }
 }

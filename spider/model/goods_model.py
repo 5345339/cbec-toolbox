@@ -14,13 +14,14 @@ class ScrollResult:
 
 
 class GoodsInfo:
-    def __init__(self, id, subject, category, detail_url, price, image_url, seller_name="", seller_shop_url="", sell_count=-1,
+    def __init__(self, id, subject, category, detail_url, price, image_url, merchant_url, seller_name="", seller_shop_url="", sell_count=-1,
                  platform=""):
         self.id = id
         self.subject = subject
         self.category = category
         self.detail_url = detail_url
         self.image_url = image_url
+        self.merchant_url = merchant_url
         self.price = price
         self.seller_name = seller_name
         self.seller_shop_url = seller_shop_url

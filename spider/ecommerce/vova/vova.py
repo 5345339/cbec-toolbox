@@ -3,6 +3,7 @@ import requests
 from common import exception
 from model import goods_model
 from util import json_util, dict_util
+from bs4 import BeautifulSoup
 
 _BASE_URL = "https://www.vova.com"
 
@@ -48,6 +49,17 @@ def get_all_category():
     ]
 
 
+def get_merchant_url_of_goods(goods_url):
+    response = requests.get(goods_url)
+    _check_response(response)
+    soup = BeautifulSoup(response.text)
+    merchant_tag = soup.find(class_='prod-info-merchant')
+    if not merchant_tag:
+        return None
+    u = merchant_tag.a["href"]
+    return _build_vova_url(u)
+
+
 def get_category_goods(category, sort="recommended", cursor=None, page_size=20):
     assert isinstance(category, goods_model.Category)
 
@@ -66,13 +78,16 @@ def get_category_goods(category, sort="recommended", cursor=None, page_size=20):
 
     for product_dict in product_list:
         product_obj = dict_util.dict2obj(product_dict)
+        url = _build_vova_url(product_obj.url)
+        merchant_url = get_merchant_url_of_goods(url)
         goods_list.append(goods_model.GoodsInfo(
             product_obj.virtual_goods_id,
             product_obj.name,
             category.name,
-            _build_vova_url(product_obj.url),
+            url,
             product_obj.shop_price_exchange,
             "",
+            merchant_url,
             platform="vova"
         ))
 
@@ -84,6 +99,32 @@ def get_category_goods(category, sort="recommended", cursor=None, page_size=20):
         idx = idx + 1
 
     return goods_model.ScrollResult(cursor, next_page_cursor, goods_list)
+
+
+def get_product_info_by_url(product_url):
+    info = {}
+    return info
+
+
+def get_merchant_product_top_n(merchant_id, top_n=15):
+    uri = _build_vova_url("merchant-" + merchant_id)
+
+    response = requests.get(uri)
+    _check_response(response)
+
+    product_list = []
+
+    soup = BeautifulSoup(response.text)
+    product_list_tag = soup.find_all(_class="cat-grid-link-wrap")
+    product_link_list = [p.div.div.a["href"] for p in product_list_tag]
+    if not product_link_list:
+        return product_list
+
+    for product_link in product_link_list:
+        info = get_product_info_by_url(_build_vova_url(product_link))
+        if not info:
+            continue
+
 
 
 def _check_response(response):

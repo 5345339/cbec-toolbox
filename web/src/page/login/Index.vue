@@ -1,136 +1,164 @@
-<!-- eslint-disable -->
 <template>
-  <div class="parent">
-    <div class="child">
-      <Card style="width: 400px">
-        <p slot="title">工具箱</p>
-        <Form ref="formInline"
-              :model="formInline"
-              :rules="ruleInline">
-          <FormItem prop="user">
-            <Input type="text"
-                   v-model="formInline.user"
-                   placeholder="用户名">
-            <Icon type="ios-person-outline"
-                  slot="prepend"></Icon>
-            </Input>
-          </FormItem>
-          <FormItem prop="password">
-            <Input type="password"
-                   v-model="formInline.password"
-                   placeholder="密码"
-                   @keyup.enter.native="handleSubmit('formInline')">
-            <Icon type="ios-lock-outline"
-                  slot="prepend"></Icon>
-            </Input>
-          </FormItem>
-          <FormItem>
-            <Button type="primary"
-                    long
-                    @click="handleSubmit('formInline')">登录</Button>
-          </FormItem>
-        </Form>
-      </Card>
-    </div>
+  <div>
+    <canvas id="canvas" height="600" width="600"></canvas>
   </div>
+
+
 </template>
 
-
 <script>
-import md5 from "blueimp-md5";
-import axios from "axios";
 export default {
+  name: "GLImage",
+
   data() {
     return {
-      formInline: {
-        user: this.$store.state.user,
-        password: "",
-      },
-      ruleInline: {
-        user: [
-          {
-            required: true,
-            message: "请输入用户名",
-            trigger: "blur",
-          },
-        ],
-        password: [
-          {
-            required: true,
-            message: "请输入密码",
-            trigger: "blur",
-          },
-          {
-            type: "string",
-            min: 6,
-            message: "密码长度最少 6 位",
-            trigger: "blur",
-          },
-        ],
-      },
+      gl: null,
+      vertexs: new Float32Array([
+        -1, 1, 0.0, 0.0, 1.0,
+        -1, -1, 0.0, 0.0, 0.0,
+        1, 1, 0.0, 1.0, 1.0,
+        1, -1, 0.0, 1.0, 0.0]),
+      vertexShaderSource: `
+                attribute vec4 a_Position;
+                attribute vec2 a_TexCoord;
+                varying vec2 v_TexCoord;
+                void main(){
+                gl_Position = a_Position;
+                v_TexCoord = a_TexCoord;
+            }`,
+      fragmentShaderSource: `
+                precision mediump float;
+                uniform sampler2D u_Sampler;
+                varying vec2 v_TexCoord;
+                void main(){
+                    gl_FragColor = texture2D(u_Sampler, v_TexCoord);
+            }`
     };
   },
+
   methods: {
-    handleSubmit(name) {
-      this.$refs[name].validate((valid) => {
-        if (valid) {
-          var data = {
-            username: this.formInline.user,
-            password: md5(this.formInline.password),
-            grant_type: "password",
-            scope: "all",
-            client_id: "web",
-            client_secret: "web-secret",
-          };
-          axios
-            .post("/api/auth/oauth/token", "", { params: data })
-            .then((response) => {
-              let token = response.data.access_token;
-              if (token) {
-                // 更新 token
-                this.$store.commit("setToken", token);
-                this.$store.commit("setUser", this.formInline.user);
-                // 跳转
-                this.$router.replace("/");
-              } else {
-                this.$Message.error("token 解析失败");
-              }
-            })
-            .catch((error) => {
-              let des = "";
-              try {
-                des = "";
-                if (error.response.data.error_description) {
-                  des = error.response.data.error_description;
-                } else if (error.response.data.message) {
-                  des = error.response.data.message;
-                }
-                this.$Message.error(des);
-                // eslint-disable-next-line no-empty
-              } catch (error) { }
-              if (!des) {
-                this.$Message.error(error);
-              }
-            });
-        }
-      });
+
+    initShader() {
+      let vertexShader = this.gl.createShader(this.gl.VERTEX_SHADER);// 创建顶点着色器
+      this.gl.shaderSource(vertexShader, this.vertexShaderSource);// 绑定顶点着色器源码
+      this.gl.compileShader(vertexShader);// 编译定点着色器
+
+
+      let fragmentShader = this.gl.createShader(this.gl.FRAGMENT_SHADER);// 创建片元着色器
+      this.gl.shaderSource(fragmentShader, this.fragmentShaderSource);// 绑定片元着色器源码
+      this.gl.compileShader(fragmentShader);// 编译片元着色器
+
+      let shaderProgram = this.gl.createProgram();// 创建着色器程序
+      this.gl.attachShader(shaderProgram, vertexShader);// 指定顶点着色器
+      this.gl.attachShader(shaderProgram, fragmentShader);// 指定片元着色色器
+
+
+      this.gl.linkProgram(shaderProgram);// 链接程序
+      this.gl.useProgram(shaderProgram);//使用着色器
+      this.gl.program = shaderProgram;
+      return true;
     },
+
+    initVertexs() {
+
+      let vertexsBuffer = this.gl.createBuffer();
+
+
+      if (vertexsBuffer === null) {
+        console.log("vertexsBuffer is null");
+        return false;
+      }
+      this.gl.bindBuffer(this.gl.ARRAY_BUFFER, vertexsBuffer);
+
+
+      this.gl.bufferData(this.gl.ARRAY_BUFFER, this.vertexs, this.gl.STATIC_DRAW);
+
+      let a_Position = this.gl.getAttribLocation(this.gl.program, "a_Position");
+      if (a_Position < 0) {
+        console.log("a_Position < 0");
+        return false;
+      }
+
+      let a_TexCoord = this.gl.getAttribLocation(this.gl.program, "a_TexCoord");
+      if (a_TexCoord < 0) {
+        console.log("a_TexCoord < 0");
+        return false;
+      }
+
+      //将顶点坐标的位置赋值
+      this.gl.vertexAttribPointer(a_Position, 3, this.gl.FLOAT, false, this.vertexs.BYTES_PER_ELEMENT * 5, 0);
+      this.gl.enableVertexAttribArray(a_Position);
+
+      //将纹理坐标赋值
+      this.gl.vertexAttribPointer(a_TexCoord, 2, this.gl.FLOAT, false, this.vertexs.BYTES_PER_ELEMENT * 5, this.vertexs.BYTES_PER_ELEMENT * 3);
+      this.gl.enableVertexAttribArray(a_TexCoord);
+
+      return true;
+    },
+
+
+    initTextures() {
+
+      let textureId = this.gl.createTexture(); //创建纹理对象
+
+      if (textureId === null) {
+        console.log("textureId is null");
+        return false;
+      }
+
+
+      this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, 1); // 对纹理图像进行y轴反转
+      this.gl.activeTexture(this.gl.TEXTURE0); // 开启0号纹理单元
+      this.gl.bindTexture(this.gl.TEXTURE_2D, textureId); // 向target绑定纹理对象
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR); // 配置纹理参数
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+      this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+
+      return true;
+    },
+
+    fill(image){
+      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
+      let u_Sampler = this.gl.getUniformLocation(this.gl.program, "u_Sampler");
+      if (u_Sampler < 0) {
+        console.log("u_Sampler < 0");
+        return false;
+      }
+      // 将0号纹理传递给着色器
+      this.gl.uniform1i(u_Sampler, 0); 
+    },
+
+    renderImage() {
+      this.fill(this.image);
+      this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    }
+
   },
+  mounted() {
+    this.gl = document.getElementById('canvas').getContext("webgl");
+          if (!this.initShader()) {
+        console.log('initShader is failed');
+        return;
+      }
+      if (!this.initVertexs()) {
+        console.log('drawVertexs is failed');
+        return;
+      }
+
+      if (!this.initTextures()) {
+        console.log('drawTextures is failed');
+        return;
+      }
+    let image = new Image();
+    image.src = "all.jpg";
+    this.image = image;
+    image.onload = this.renderImage;
+  }
 };
 </script>
 
-<style>
-.parent {
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
+<style scoped>
 
-.child {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  margin-top: 100px;
-  margin-left: -200px;
-}
 </style>

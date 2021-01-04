@@ -31,6 +31,14 @@ public class ProductCollectService {
     @Async
     @Transactional(rollbackFor = Exception.class)
     public void asyncCollect(PlatformAccountDTO platformAccount, String startTime, String endTime) {
+        collect(platformAccount, startTime, endTime);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void collect(PlatformAccountDTO platformAccount, String startTime, String endTime){
+        log.info("Start to collect product for {} between {} and {}",
+                platformAccount.getPlatformUser(), startTime, endTime);
+
         if (StringUtils.isEmpty(platformAccount.getApiToken())) {
             throw new BizException("Platform account api token is empty for " + platformAccount.getPlatformUser());
         }
@@ -38,11 +46,11 @@ public class ProductCollectService {
         var productDTOList = goodsSpiderApi.syncProduct(platformAccount.getPlatform(),
                 platformAccount.getApiToken(), startTime, endTime);
         if (CollectionUtils.isEmpty(productDTOList)) {
-            log.info("No product found for {} between {} to {}", platformAccount, startTime, endTime);
+            log.info("No product found for {} between {} to {}", platformAccount.getPlatformUser(), startTime, endTime);
             return;
         }
 
-        log.info("Found {} product for {} between {} to {}", productDTOList.size(), platformAccount,
+        log.info("Found {} product for {} between {} to {}", productDTOList.size(), platformAccount.getPlatformUser(),
                 startTime, endTime);
 
         productDTOList.forEach(productDTO -> {

@@ -143,14 +143,19 @@ def get_product_list_by_page(token, start_time, end_time, page=1, per_page=100):
 
         product_id = product["product_id"]
         cat_id = product["cat_id"]
-        main_image = product["main_image"]
         goods_name = product["goods_name"]
         goods_description = product["goods_description"]
         parent_sku = product["parent_sku"]
+        main_image = product["main_image"]
 
         product_image_list = get_product_image(token, product_id)
         if not product_image_list:
             continue
+
+        # update main image
+        main_image_list = [img.url for img in product_image_list if img.main_image]
+        if main_image_list:
+            main_image = main_image_list[0]
 
         sku_list = product["sku_list"]
         if not sku_list:
@@ -258,17 +263,17 @@ def get_upload_status_by_batch_id(token, upload_batch_id):
 
     status = response_dict["code"]
     message = response_dict["message"]
-    product_id_list = []
+    ids = []
 
     if 'success' == status:
         status = 'uploaded'
         succeed_product_list = response_dict["data"]
         if succeed_product_list:
-            product_id_list.extend([{p["product_id"], p['parent_sku']} for p in succeed_product_list])
+            ids.extend([{"product_id": p["product_id"], "parent_sku": p['parent_sku']} for p in succeed_product_list])
     else:
         status = 'prepare'
 
-    return product_model.UploadStatus(status, message, product_id_list)
+    return product_model.UploadStatus(status, message, ids)
 
 
 def enable_product_sale(token, product_id_list):
@@ -288,7 +293,9 @@ def enable_product_sale(token, product_id_list):
     code = response_data["code"]
     if code != _SUCCESS_CODE:
         message = response_data["message"]
-        errors_list = response_data["errors_list"]
+        errors_list = ""
+        if "errors_list" in response_data:
+            errors_list = response_data["errors_list"]
         message = message + "; => " + obj2json(errors_list)
         raise exception.BizException(message)
 
