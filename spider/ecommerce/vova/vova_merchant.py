@@ -62,7 +62,8 @@ def get_unhandled_order(cookie):
     order_list_tag = soup.find_all(lambda tag: tag.has_attr('data-order-goods-sn'))
     for order_tag in order_list_tag:
         td_tags = order_tag.find_all("td")
-
+        styles_list = [tag for tag in td_tags[9].contents if isinstance(tag, str)]
+        styles_str = "<br>".join(styles_list)
         order = order_model.Order(td_tags[6].a.text,
                                   td_tags[0].a.text,
                                   td_tags[1].text,
@@ -77,7 +78,7 @@ def get_unhandled_order(cookie):
                                   td_tags[8].a.img.attrs["src"],
                                   td_tags[8].a.attrs["href"],
                                   td_tags[8].a.div.span.text,
-                                  td_tags[9].text)
+                                  styles_str)
         order_list.append(order)
 
     return order_list
