@@ -12,8 +12,12 @@ public class OrderDTO {
     @JsonProperty("confirm_time")
     private Date confirmTime;
     private String sn;
+    private String sku;
     private Integer num;
     private Float price;
     @JsonProperty("image_url")
     private String imageUrl;
+    @JsonProperty("detail_url")
+    private String detailUrl;
+    private String remark;
 }

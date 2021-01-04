@@ -2,6 +2,7 @@
 
 import logging
 
+import os
 import requests
 from bs4 import BeautifulSoup
 
@@ -62,26 +63,29 @@ def get_unhandled_order(cookie):
     for order_tag in order_list_tag:
         td_tags = order_tag.find_all("td")
 
-        order = order_model.Order(td_tags[6].a.string,
-                                  td_tags[0].a.string,
-                                  td_tags[1].string,
-                                  td_tags[2].a.string,
+        order = order_model.Order(td_tags[6].a.text,
+                                  td_tags[0].a.text,
+                                  td_tags[1].text,
+                                  td_tags[2].a.text,
                                   td_tags[3].attrs["data-time"],
                                   td_tags[4].attrs["data-time"],
                                   td_tags[5].attrs["data-time"],
-                                  td_tags[11].string,
+                                  td_tags[11].text,
                                   str(td_tags[12].string).split(" ")[1],
-                                  td_tags[13].string,
-                                  td_tags[14].a.string,
-                                  td_tags[8].a.img.attrs["src"])
+                                  td_tags[13].text,
+                                  td_tags[14].a.text,
+                                  td_tags[8].a.img.attrs["src"],
+                                  td_tags[8].a.attrs["href"],
+                                  td_tags[8].a.div.span.text,
+                                  td_tags[9].text)
         order_list.append(order)
 
     return order_list
 
 
 def main():
-    user = "test"
-    password = "11"
+    user = os.getenv("USER")
+    password = os.getenv("PASSWORD")
     cookie = login(user, password)
     aa = get_unhandled_order(cookie)
     print(aa)

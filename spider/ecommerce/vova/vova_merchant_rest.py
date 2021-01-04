@@ -6,10 +6,12 @@ import os
 import requests
 
 from common import exception
-from model import product_model
+from model import product_model, order_model
 from util.json_util import obj2json, json2dict
+from util.dict_util import dict2obj
 
-_BASE_URL = "https://merchant.vova.com.hk/api/v1"
+_PRODUCT_BASE_URL = "https://merchant.vova.com.hk/api/v1"
+_ORDER_BASE_URL = "https://merchant-api.vova.com.hk/v1"
 _SUCCESS_CODE = 20000
 _PRODUCT_ALREADY_EXIST_ERROR_CODE = 40015
 _SKU_IMAGE_MAX_NUM = 20
@@ -22,8 +24,12 @@ VOVA商家
 _DEFAULT_TIMEOUT = 10
 
 
-def build_url(uri):
-    return _BASE_URL + uri
+def build_product_api_url(uri):
+    return _PRODUCT_BASE_URL + uri
+
+
+def build_order_api_url(uri):
+    return _ORDER_BASE_URL + uri
 
 
 def check_response(resp):
@@ -45,7 +51,7 @@ def get_product_image(token, product_id):
     while not succeed and retry_times > 0:
         response_text = ''
         try:
-            response = requests.get(build_url(uri) + "?token=" + token + "&product_id=" + product_id,
+            response = requests.get(build_product_api_url(uri) + "?token=" + token + "&product_id=" + product_id,
                                     timeout=_DEFAULT_TIMEOUT)
             check_response(response)
             response_text = response.text
@@ -105,7 +111,7 @@ def get_product_list_by_page(token, start_time, end_time, page=1, per_page=100):
 
     response_text = ""
     try:
-        response = requests.post(build_url(uri), headers=json_header(), data=obj2json(params),
+        response = requests.post(build_product_api_url(uri), headers=json_header(), data=obj2json(params),
                                  timeout=_DEFAULT_TIMEOUT)
         check_response(response)
         response_text = response.text
@@ -212,7 +218,7 @@ def add_product_sku(token, parent_sku, goods_sku, storage, market_price, shop_pr
         ]
     }
 
-    response = requests.post(build_url(uri), headers=json_header(), data=obj2json(params))
+    response = requests.post(build_product_api_url(uri), headers=json_header(), data=obj2json(params))
     check_response(response)
     response_dict = json2dict(response.text)
 
@@ -231,7 +237,7 @@ def upload_product(token, product_list_dto):
     }
 
     data = obj2json(params).encode("utf-8").decode("latin1")
-    response = requests.post(build_url(uri), headers=json_header(), data=data)
+    response = requests.post(build_product_api_url(uri), headers=json_header(), data=data)
     check_response(response)
     response_dict = json2dict(response.text)
     response_data = response_dict["data"]
@@ -257,7 +263,7 @@ def get_upload_status_by_batch_id(token, upload_batch_id):
         }
     }
 
-    response = requests.post(build_url(uri), headers=json_header(), data=obj2json(params))
+    response = requests.post(build_product_api_url(uri), headers=json_header(), data=obj2json(params))
     check_response(response)
     response_dict = json2dict(response.text)
 
@@ -284,7 +290,7 @@ def enable_product_sale(token, product_id_list):
         "goods_list": product_id_list,
     }
 
-    response = requests.post(build_url(uri), headers=json_header(), data=obj2json(params))
+    response = requests.post(build_product_api_url(uri), headers=json_header(), data=obj2json(params))
     check_response(response)
 
     response_dict = json2dict(response.text)
@@ -308,7 +314,7 @@ def delete_product(token, product_id_list):
         "goods_list": product_id_list
     }
 
-    response = requests.post(build_url(uri), headers=json_header(), data=obj2json(params))
+    response = requests.post(build_product_api_url(uri), headers=json_header(), data=obj2json(params))
     check_response(response)
 
     response_dict = json2dict(response.text)
@@ -347,4 +353,4 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
-    copy_product(os.getenv("SRC_TOKEN"), os.getenv("DST_TOKEN"), '2020-12-13 00:00:00', '2020-12-13 23:59:59', 1)
+    # copy_product(os.getenv("SRC_TOKEN"), os.getenv("DST_TOKEN"), '2020-12-13 00:00:00', '2020-12-13 23:59:59', 1)

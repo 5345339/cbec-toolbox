@@ -69,6 +69,11 @@ services:
     image: registry.cn-hangzhou.aliyuncs.com/lzk90s/com.cbec.messager:1.0.0-SNAPSHOT
     networks:
       - toolbox
+    environment:
+      - SPRING_MAIL_HOST
+      - SPRING_MAIL_PORT
+      - SPRING_MAIL_USERNAME
+      - SPRING_MAIL_PASSWORD
 
   goods:
     restart: always

@@ -26,18 +26,20 @@ public class MessageApiImpl implements MessageApi {
 
     @Override
     public void sendMail(@RequestBody MessageDTO message) {
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-            helper.setFrom(from);
-            helper.setTo(message.getDestination());
-            helper.setSubject("跨境电商: 通知消息");
-            helper.setText(message.getMessage(), true);
-            mailSender.send(mimeMessage);
-            log.info("发送邮件到{}成功，消息为: {}", message.getDestination(), message.getMessage());
-        } catch (MessagingException e) {
-            log.info("发送邮件到{}失败，消息为: {}，原因: {}", message.getDestination(), message.getMessage(), e.getMessage());
-        }
+        message.parseDestination().forEach(dest -> {
+            try {
+                MimeMessage mimeMessage = mailSender.createMimeMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+                helper.setFrom(from);
+                helper.setTo(dest);
+                helper.setSubject(message.getTitle());
+                helper.setText(message.getMessage(), true);
+                mailSender.send(mimeMessage);
+                log.info("发送邮件到{}成功", message);
+            } catch (MessagingException e) {
+                log.info("发送邮件到{}失败， 原因: {}", message, e.getMessage());
+            }
+        });
     }
 
     @Override

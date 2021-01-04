@@ -4,11 +4,11 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.cbec.internal.api.auth.PlatformAccountDTO;
 import com.cbec.internal.api.messager.MessageDTO;
 import com.cbec.internal.api.spider.OrderDTO;
+import com.cbec.order.dao.entity.OrderEntity;
 import com.cbec.order.feign.MessageApiFeign;
 import com.cbec.order.feign.OrderSpiderApiFeign;
 import com.cbec.order.feign.PlatformAccountApiFeign;
 import com.cbec.order.feign.UserApiFeign;
-import com.cbec.order.dao.entity.OrderEntity;
 import freemarker.template.TemplateException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +45,7 @@ public class UnhandledOrderNotifyService {
     private int notifyInternalHour;
 
     @Transactional(rollbackFor = Exception.class)
-    public void scanOrder(){
+    public void scanOrder() {
         log.info("Start scan......");
 
         var accountList = platformAccountApiFeign.listAllUserPlatformAccount();
@@ -54,10 +54,8 @@ public class UnhandledOrderNotifyService {
             return;
         }
 
-        accountList.forEach(account -> {
-            syncUserUnhandledOrder(account);
-            notifyUserNewOrder(account.getUser(), account.getPlatformUser());
-        });
+        accountList.forEach(this::syncUserUnhandledOrder);
+        accountList.forEach(this::notifyUserNewOrder);
     }
 
     private void syncUserUnhandledOrder(PlatformAccountDTO account) {
@@ -80,7 +78,7 @@ public class UnhandledOrderNotifyService {
         var orderEntityList = orderList.stream()
                 .map(s -> OrderEntity.getConverter().doBackward(s))
                 .peek(s -> s.setPlatform(account.getPlatform()))
-                .peek(s->s.setPlatformAccount(account.getPlatformUser()))
+                .peek(s -> s.setPlatformAccount(account.getPlatformUser()))
                 .peek(s -> s.setUser(account.getUser()))
                 .collect(Collectors.toList());
         orderService.insertOrUpdateBatch(orderEntityList);
@@ -88,8 +86,11 @@ public class UnhandledOrderNotifyService {
         log.info("发现用户{}的{}个未处理订单", account.getPlatformUser(), orderEntityList.size());
     }
 
-    private void notifyUserNewOrder(String user, String platformAccount) {
-        if (!hasUnNotifyOrder(user)){
+    private void notifyUserNewOrder(PlatformAccountDTO platformAccountDTO) {
+        String user = platformAccountDTO.getUser();
+        String platformAccount = platformAccountDTO.getPlatformUser();
+
+        if (!hasUnNotifyOrder(user)) {
             return;
         }
 
@@ -103,7 +104,8 @@ public class UnhandledOrderNotifyService {
         }
 
         var userInfo = userApiFeign.getUserInfo(user);
-        var messageDTO = new MessageDTO(userInfo.getEmail(), buildNotifyMessage(user, platformAccount, orderList));
+        var messageDTO = new MessageDTO(userInfo.getEmail(), "跨境电商: 未处理订单通知消息",
+                buildNotifyMessage(user, platformAccount, orderList));
         messageApiFeign.sendMail(messageDTO);
 
         log.info("通知用户{}下的帐号{}有{}个未处理的订单", user, platformAccount, orderList.size());
@@ -115,7 +117,7 @@ public class UnhandledOrderNotifyService {
         orderService.updateBatchById(newOrderList);
     }
 
-    private boolean hasUnNotifyOrder(String user){
+    private boolean hasUnNotifyOrder(String user) {
         return orderService.selectCount(new EntityWrapper<OrderEntity>()
                 .eq("user", user).isNull("last_notify_time")) > 0;
     }
@@ -128,7 +130,7 @@ public class UnhandledOrderNotifyService {
     }
 
     private String buildNotifyMessage(String user, String platformAccount, List<OrderEntity> orderDTOList) {
-        if (CollectionUtils.isEmpty(orderDTOList)){
+        if (CollectionUtils.isEmpty(orderDTOList)) {
             return "";
         }
 

@@ -20,9 +20,12 @@ public class OrderEntity {
     private String type;
     private Date confirmTime;
     private String sn;
+    private String sku;
     private Integer num;
     private Float price;
     private String imageUrl;
+    private String detailUrl;
+    private String remark;
     private Date lastNotifyTime;
 
     public static BeanConverter<OrderEntity, OrderDTO> getConverter() {

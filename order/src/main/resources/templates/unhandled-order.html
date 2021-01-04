@@ -11,11 +11,11 @@
     <tr bgcolor="#FF8F59">
         <th>订单类型</th>
         <th>确认时间(UTC)</th>
-        <th>订单SN</th>
-        <th>产品图片</th>
+        <th>图片</th>
+        <th>链接</th>
         <th>总价($)</th>
         <th>数量</th>
-        <th>上次通知时间</th>
+        <th>备注</th>
     </tr>
     </thead>
     <tbody>
@@ -23,11 +23,11 @@
     <tr bgcolor="<#if order.lastNotifyTime??>#FFFFFF<#else>#AFEEEE</#if>">
         <td>${order.type!''}</td>
         <td><#if order.confirmTime??> ${(order.confirmTime)?string("yyyy-MM-dd HH:mm:ss")} <#else></#if></td>
-        <td>${order.sn!''}</td>
         <td><img src="${order.imageUrl!''}"/></td>
+        <td><a href="${order.detailUrl!''}"><span>${order.sku!''}</span></a></td>
         <td>${order.price!''}</td>
         <td>${order.num!''}</td>
-        <td><#if order.lastNotifyTime??> ${(order.lastNotifyTime)?string("yyyy-MM-dd HH:mm:ss")!''} <#else></#if> </td>
+        <td>${order.remark!''}</td>
     </tr>
     </#list>
     </tbody>
