@@ -10,6 +10,5 @@ import java.util.List;
 public interface OrderSpiderApi {
     @GetMapping("/list_unhandled_order/{platform}")
     List<OrderDTO> listUnhandledOrder(@PathVariable("platform") String platform,
-                                      @RequestParam("user") String user,
-                                      @RequestParam("password") String password);
+                                      @RequestParam("apiToken") String apiToken);
 }

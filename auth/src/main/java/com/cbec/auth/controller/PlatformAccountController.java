@@ -21,6 +21,8 @@ public class PlatformAccountController {
     @PostMapping
     public Result<Void> addAccount(@RequestBody PlatformAccountEntity platformAccountEntity) {
         platformAccountEntity.setId(null);
+        // no password
+        platformAccountEntity.setPlatformPassword("***");
         platformAccountEntity.setUser(UserUtil.getUserName());
         platformAccountService.insert(platformAccountEntity);
         return Result.ok();

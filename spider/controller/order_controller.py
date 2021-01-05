@@ -2,19 +2,20 @@ from flask import request, Blueprint, Response
 
 from common import exception
 from util import json_util
-from ecommerce.vova import vova_merchant
+from ecommerce.vova import vova_merchant_rest
 
 order = Blueprint('order', __name__)
 
 
 @order.route('/list_unhandled_order/<platform>', methods=['GET'])
 def list_unhandled_order(platform):
-    user = request.args.get("user")
-    password = request.args.get("password")
-    if not user or not password:
-        raise exception.BizException("用户或者密码不存在")
+    api_token = request.args.get("apiToken")
+    if not api_token:
+        raise ValueError("Invalid params")
 
-    cookie = vova_merchant.login(user, password)
-    order_list = vova_merchant.get_unhandled_order(cookie)
-    response = json_util.obj2json(order_list)
-    return Response(response, mimetype='application/json')
+    return response_json_data(vova_merchant_rest.list_unhandled_order(api_token))
+
+
+def response_json_data(response):
+    assert not isinstance(response, str)
+    return Response(json_util.obj2json(response), mimetype='application/json')

@@ -1,4 +1,4 @@
-FROM alpine:3.11 as builder
+FROM alpine:latest as builder
 
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories  && \
     apk add nodejs yarn && \

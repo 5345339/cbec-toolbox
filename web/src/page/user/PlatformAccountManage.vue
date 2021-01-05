@@ -26,11 +26,11 @@
           <span>{{ row.id }}</span>
         </template>
         <template slot-scope="{ row, index }"
-                  slot="platformPassword">
+                  slot="apiToken">
           <Input type="text"
-                 v-model="editPlatformPassword"
+                 v-model="editApiToken"
                  v-if="editIndex === index" />
-          <span v-else>{{ row.platformPassword }}</span>
+          <span v-else>{{ row.apiToken }}</span>
         </template>
         <template slot-scope="{ row, index }"
                   slot="operation">
@@ -65,8 +65,8 @@
         <Form ref="formValidate"
               :model="formValidate"
               :rules="ruleValidate"
-              :label-width="80">
-          <FormItem label="平台用户名"
+              :label-width="100">
+          <FormItem label="平台类型"
                     prop="platform">
             <Select v-model="formValidate.platform">
               <Option :value="item.name"
@@ -75,16 +75,16 @@
             </Select>
           </FormItem>
 
-          <FormItem label="平台用户名"
+          <FormItem label="平台用户"
                     prop="platformUser">
             <Input v-model="formValidate.platformUser"
                    placeholder="请输入平台用户名" />
           </FormItem>
-
-          <FormItem label="平台密码"
-                    prop="platformPassword">
-            <Input v-model="formValidate.platformPassword"
-                   placeholder="请输入平台密码" />
+          
+          <FormItem label="ApiToken"
+                    prop="apiToken">
+            <Input v-model="formValidate.apiToken"
+                   placeholder="请输入ApiToken" />
           </FormItem>
 
           <FormItem>
@@ -132,7 +132,7 @@ export default {
       formValidate: {
         platform: "",
         platformUser: "",
-        platformPassword: "",
+        apiToken: "",
       },
       ruleValidate: {
         platform: [
@@ -141,31 +141,34 @@ export default {
         platformUser: [
           { required: true, message: " ", trigger: "blur", type: "string" },
         ],
-        platformPassword: [
-          { required: true, message: " ", trigger: "blur", type: "string" },
-        ],
+        apiToken: [
+          { required: true, message: " ", trigger: "blur", type: "string" }
+        ]
       },
       columns: [
         {
           type: "index",
-          width: 60,
+          width: 50,
           align: "center",
         },
         {
           title: "ID",
           key: "id",
+          width: 80,
         },
         {
           title: "平台名称",
           key: "platform",
+          width: 200,
         },
         {
           title: "平台用户名",
           key: "platformUser",
+          width: 200,
         },
         {
-          title: "平台密码",
-          slot: "platformPassword",
+          title: "ApiToken",
+          slot: "apiToken",
         },
         {
           title: "操作",
@@ -176,10 +179,10 @@ export default {
     };
   },
   mounted() {
-    this.reset();
+    this.reload();
   },
   methods: {
-    reset() {
+    reload() {
       let params = this.initParams();
       params.pageNo = 1;
       params.pageSize = this.pageSize;
@@ -231,30 +234,29 @@ export default {
       let params = {};
       params.platform = data.platform;
       params.platformUser = data.platformUser;
-      params.platformPassword = data.platformPassword;
+      params.apiToken = data.apiToken;
       post("/api/auth/platform_account",
         params,
         () => {
-          this.reset();
+          this.reload();
         },
         () => {
-          this.reset();
         });
       this.showAddDialog(false);
     },
     handleUpdate(row, index) {
-      if (this.editPlatformPassword != row.platformPassword) {
+      if (this.editApiToken != row.apiToken) {
         this.saving = true;
         let row = this.data[index];
         let params = {};
         params.id = row.id;
-        params.platformPassword = this.editPlatformPassword;
+        params.apiToken = this.editApiToken;
         put(`/api/auth/platform_account`,
           params,
           () => {
             this.editIndex = -1;
             this.saving = false;
-            row.platformPassword = this.editPlatformPassword;
+            row.apiToken = this.editApiToken;
           },
           () => {
             this.saving = false;
@@ -263,24 +265,22 @@ export default {
         this.editIndex = -1;
         this.saving = false;
       }
-      this.reset();
     },
     handleDelete() {
       del(`/api/auth/platform_account/${this.deletePlatformId}`,
         () => {
-          this.reset();
+          this.reload();
         },
         () => {
-          this.reset();
         });
     },
     handleEdit(row, index) {
       this.editIndex = index;
-      this.editPlatformPassword = row.platformPassword;
+      this.editApiToken = row.apiToken;
     },
     handleResetInput(data) {
       data.platformUser = "";
-      data.platformPassword = "";
+      data.apiToken = "";
     },
   },
 };

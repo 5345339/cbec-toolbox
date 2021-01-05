@@ -59,8 +59,7 @@ public class UnhandledOrderNotifyService {
     }
 
     private void syncUserUnhandledOrder(PlatformAccountDTO account) {
-        var orderList = orderSpiderApiFeign.listUnhandledOrder(account.getPlatform(),
-                account.getPlatformUser(), account.getPlatformPassword());
+        var orderList = orderSpiderApiFeign.listUnhandledOrder(account.getPlatform(), account.getApiToken());
         if (CollectionUtils.isEmpty(orderList)) {
             orderService.delete(new EntityWrapper<OrderEntity>()
                     .eq("user", account.getUser())

@@ -1,14 +1,16 @@
 #!/usr/bin/python
 
+import datetime
 import logging
 import os
 
 import requests
 
 from common import exception
-from model import product_model, order_model
-from util.json_util import obj2json, json2dict
+from model import order_model
+from model import product_model
 from util.dict_util import dict2obj
+from util.json_util import obj2json, json2dict
 
 _PRODUCT_BASE_URL = "https://merchant.vova.com.hk/api/v1"
 _ORDER_BASE_URL = "https://merchant-api.vova.com.hk/v1"
@@ -16,6 +18,7 @@ _SUCCESS_CODE = 20000
 _PRODUCT_ALREADY_EXIST_ERROR_CODE = 40015
 _SKU_IMAGE_MAX_NUM = 20
 _EXECUTE_SUCCESS = 'success'
+_PRODUCT_DETAIL_PAGE_PREFIX_URL = "https://www.vova.com/-m"
 
 '''
 VOVA商家
@@ -349,8 +352,61 @@ def copy_product(src_token, dst_token, start_time, end_time, page=1):
     # succeed_product_id_list = get_upload_status_by_batch_id(dst_token, upload_id)
 
 
+def list_unhandled_order(token, start_time=None, end_time=None):
+    if not start_time:
+        start_time = (datetime.datetime.now() + datetime.timedelta(days=-60)).strftime("%Y-%m-%d") + " 00:00:00"
+    if not end_time:
+        end_time = datetime.datetime.today().strftime('%Y-%m-%d') + " 23:59:59"
+
+    uri = "/order/Unhandled?token=" + token + "&start_confirm_time=" + start_time + "&end_confirm_time=" + end_time
+
+    response = requests.get(build_order_api_url(uri))
+    check_response(response)
+
+    response_dict = json2dict(response.text)
+    if response_dict["code"] != _SUCCESS_CODE:
+        raise exception.BizException(response_dict["msg"])
+
+    unhandled_order_list = []
+    order_list = response_dict["data"]["order_list"]
+    if not order_list:
+        return unhandled_order_list
+
+    for order in order_list:
+        order_obj = dict2obj(order)
+
+        id = order_obj.order_sn
+        type = "普通订单"
+        if order_obj.is_combined_order:
+            type = "集运订单"
+        confirm_time = order_obj.confirm_time
+        sn = order_obj.order_sn
+        delivery_count_down = ""
+        order_cancel_count_down = ""
+        order_collection_count_down = ""
+        num = int(order_obj.goods_number)
+        price = float(order_obj.shop_price)
+        total_price = float(order_obj.shop_price_amount)
+        pay_status = order_obj.order_state
+        image_url = order_obj.sku_image_url
+        detail_url = _PRODUCT_DETAIL_PAGE_PREFIX_URL + order_obj.website_goods_id
+        sku = order_obj.sku
+        remarks = []
+        for k, v in order_obj.style_list.items():
+            remarks.append("{}: {}".format(k, v))
+        remark_str = "<br>".join(remarks)
+
+        o = order_model.Order(id, type, confirm_time, sn, delivery_count_down, order_cancel_count_down,
+                              order_collection_count_down, num, price, total_price, pay_status, image_url, detail_url,
+                              sku, remark_str)
+        unhandled_order_list.append(o)
+
+    return unhandled_order_list
+
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
     # copy_product(os.getenv("SRC_TOKEN"), os.getenv("DST_TOKEN"), '2020-12-13 00:00:00', '2020-12-13 23:59:59', 1)
+    list_unhandled_order(os.getenv("SRC_TOKEN"))

@@ -45,7 +45,7 @@ public class ProductUploadTask {
     private int maxUploadProductPerTime;
 
     @GetMapping("/clone_product")
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 8 * * ?")
     public void cloneProduct() {
         log.info("Clone product");
 
@@ -74,7 +74,7 @@ public class ProductUploadTask {
     }
 
     @GetMapping("/upload_product")
-    @Scheduled(fixedDelay = 300000)
+    @Scheduled(fixedDelay = 2 * 60 * 1000)
     public void uploadProduct() {
         log.info("Upload product");
 
@@ -89,7 +89,7 @@ public class ProductUploadTask {
     }
 
     @GetMapping("/check_upload_status")
-    @Scheduled(fixedDelay = 5 * 60 * 1000)
+    @Scheduled(fixedDelay = 2 * 60 * 1000)
     public void checkUploadStatus() {
         log.info("Check upload status");
 

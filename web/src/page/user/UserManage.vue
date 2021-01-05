@@ -110,7 +110,7 @@ export default {
           slot: "phone",
         },
         {
-          title: "",
+          title: "邮箱",
           slot: "email",
         },
         {
