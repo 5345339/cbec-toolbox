@@ -15,11 +15,11 @@
 
 ## 整体架构图
 
-![architecture](architecture/architecture.svg)
+![architecture](doc/architecture.svg)
 
 ## C4-container 图
 
-![c4-container](architecture/container-diagram.svg)
+![c4-container](doc/container-diagram.svg)
 
 ## 手动编译方法
 
