@@ -16,7 +16,7 @@ System_Boundary(thisSystem, "外贸系统"){
     Container(goodsContainer, "商品服务", "Java, springmvc", "爬取商品")
     Container(logisticsContainer,"物流服务","Java, springmvc", "物流管理")
     Container(spiderContainer, "爬虫服务", "Python", "爬取电商平台的产品等")
-    Container(messagerContainer, "信使服务", "Python", "通知推送机器人，推送消息到用户")
+    Container(messagerContainer, "消息服务", "Python", "通知推送机器人，推送消息到用户")
 
     Rel_D(goodsContainer, spiderContainer, "获取爬虫数据", "HTTPS")
     Rel(orderContainer, messagerContainer, "发送通知消息")
@@ -30,26 +30,32 @@ System_Boundary(storage, "存储"){
 
 System_Boundary(logistics, "物流"){
     System_Ext(yw56, "燕文物流")
+    System_Ext(4px, "递四方物流")
+    System_Ext(eyoubao, "邮政E邮宝")
 }
 
-System_Ext(vova, "VOVA电商平台")
+System_Boundary(cbecPlatform, "跨境电商平台") {
+    System_Ext(vova, "VOVA电商平台")
+    System_Ext(shopee, "Shopee")
+    System_Ext(aliexpress, "速卖通aliexpress")
+}
 
-System_Boundary(platform, "商品采集平台"){
-    System_Ext(ali1688, "1688电商平台")
-    System_Ext(taobao, "淘宝电商平台")
-    System_Ext(pdd, "拼多多电商平台")
+System_Boundary(ecoPlatform, "国内电商平台"){
+    System_Ext(ali1688, "1688")
+    System_Ext(taobao, "淘宝")
+    System_Ext(pdd, "拼多多")
 }
 
 
 Rel(user, orderContainer, "订单处理", "HTTPS")
 Rel(user, logisticsContainer, "物流查询，成本预估","HTTPS")
 Rel(user, authContainer, "登陆、验证")
-Rel_Back(messagerContainer, user, "推送消息", "邮件，微信等")
+Rel_Back(user, messagerContainer, "推送消息", "邮件，微信等")
 
 
-Rel_R(orderContainer, vova, "查询订单")
-Rel_D(goodsContainer, platform, "采集商品")
-Rel_D(spiderContainer, platform, "爬取数据", "html/json")
+Rel_R(orderContainer, cbecPlatform, "查询订单")
+Rel_D(goodsContainer, ecoPlatform, "采集商品")
+Rel_D(spiderContainer, ecoPlatform, "爬取数据", "html/json")
 Rel_R(logisticsContainer, logistics, "查询物流", "HTTPS")
 
 Rel_D(thisSystem, storage, "持久化")

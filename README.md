@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/lzk90s/cbec-toolbox.svg?branch=master)](https://travis-ci.org/lzk90s/cbec-toolbox)
 
-
 ## 功能特性
 
 - [x] 成本预估，预估产品上架的价格
@@ -10,10 +9,17 @@
 - [x] 自动选品，找到最优惠的货源(vova)
 - [x] 多个帐号的商品自动同步（vova），店群模式
 
+## TODO
 
-## 架构
+- [ ] 拼多多自动采集
 
-![architecture](architecture/container-diagram.svg)
+## 整体架构图
+
+![architecture](architecture/architecture.svg)
+
+## C4-container 图
+
+![c4-container](architecture/container-diagram.svg)
 
 ## 手动编译方法
 
