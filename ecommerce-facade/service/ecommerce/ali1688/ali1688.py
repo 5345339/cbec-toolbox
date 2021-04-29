@@ -1,10 +1,7 @@
 from common import exception
-from ecommerce.ali1688 import alibaba_lib
+from service.ecommerce.ali1688 import alibaba_lib
 from model import goods_model
 from util import dict_util
-
-import  requests
-from bs4 import BeautifulSoup
 
 _BASE_URL = "https://s.1688.com"
 

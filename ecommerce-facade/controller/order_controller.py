@@ -1,8 +1,7 @@
 from flask import request, Blueprint, Response
 
-from common import exception
 from util import json_util
-from ecommerce.vova import vova_merchant_rest
+from service.ecommerce.vova import vova_merchant_rest
 
 order = Blueprint('order', __name__)
 

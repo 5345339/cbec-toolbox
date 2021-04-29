@@ -4,9 +4,8 @@ import logging
 from flask import Blueprint, request, Response
 
 from common import exception
-from ecommerce.ali1688 import ali1688
-from ecommerce.vova import vova
-from ecommerce.vova import vova_merchant_rest
+from service.ecommerce.ali1688 import ali1688
+from service.ecommerce.vova import vova, vova_merchant_rest
 from model import product_model
 from util import json_util, dict_util
 

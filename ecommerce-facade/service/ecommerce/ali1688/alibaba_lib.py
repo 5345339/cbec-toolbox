@@ -7,13 +7,12 @@ import os.path
 import time
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
-import re, json
 
 import requests
 
-from ecommerce.ali1688.func_txy import get_random_str
-from ecommerce.ali1688.func_txy import request_get
-from ecommerce.ali1688.func_txy import request_post
+from service.ecommerce.ali1688.func_txy import get_random_str
+from service.ecommerce.ali1688.func_txy import request_get
+from service.ecommerce.ali1688.func_txy import request_post
 
 
 class Alibaba(object):
