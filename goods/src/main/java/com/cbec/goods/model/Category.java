@@ -1,6 +1,6 @@
 package com.cbec.goods.model;
 
-import com.cbec.internal.api.spider.CategoryDTO;
+import com.cbec.internal.api.ecommerce_facade.CategoryDTO;
 import com.google.common.base.Converter;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

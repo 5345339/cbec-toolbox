@@ -8,7 +8,7 @@ import com.cbec.goods.dao.entity.ProductSkuEntity;
 import com.cbec.goods.dao.entity.UploadRecordEntity;
 import com.cbec.goods.feign.GoodsSpiderApiFeign;
 import com.cbec.internal.api.auth.PlatformAccountDTO;
-import com.cbec.internal.api.spider.ProductDTO;
+import com.cbec.internal.api.ecommerce_facade.ProductDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

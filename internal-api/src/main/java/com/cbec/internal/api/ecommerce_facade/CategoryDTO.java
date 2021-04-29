@@ -1,4 +1,4 @@
-package com.cbec.internal.api.spider;
+package com.cbec.internal.api.ecommerce_facade;
 
 import lombok.Data;
 

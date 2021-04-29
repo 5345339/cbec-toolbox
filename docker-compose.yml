@@ -58,6 +58,13 @@ services:
       - MYSQL_ROOT_PASSWORD
       - PARAMS
 
+  ecommerce-facade:
+    restart: always
+    image: registry.cn-hangzhou.aliyuncs.com/lzk90s/com.cbec.ecommerce-facade:1.0.0-SNAPSHOT
+    networks:
+      - toolbox
+      -
+
   spider:
     restart: always
     image: registry.cn-hangzhou.aliyuncs.com/lzk90s/com.cbec.spider:1.0.0-SNAPSHOT

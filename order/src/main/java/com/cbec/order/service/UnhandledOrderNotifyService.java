@@ -3,7 +3,7 @@ package com.cbec.order.service;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.cbec.internal.api.auth.PlatformAccountDTO;
 import com.cbec.internal.api.messager.MessageDTO;
-import com.cbec.internal.api.spider.OrderDTO;
+import com.cbec.internal.api.ecommerce_facade.OrderDTO;
 import com.cbec.order.dao.entity.OrderEntity;
 import com.cbec.order.feign.MessageApiFeign;
 import com.cbec.order.feign.OrderSpiderApiFeign;

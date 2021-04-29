@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.baomidou.mybatisplus.enums.IdType;
 import com.cbec.common.bean.BeanConverter;
-import com.cbec.internal.api.spider.GoodsInfoDTO;
+import com.cbec.internal.api.ecommerce_facade.GoodsInfoDTO;
 import lombok.Data;
 
 @Data

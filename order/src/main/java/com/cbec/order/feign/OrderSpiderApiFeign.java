@@ -1,8 +1,8 @@
 package com.cbec.order.feign;
 
-import com.cbec.internal.api.spider.OrderSpiderApi;
+import com.cbec.internal.api.ecommerce_facade.OrderSpiderApi;
 import org.springframework.cloud.openfeign.FeignClient;
 
-@FeignClient(name = "orderSpider", url = "${SPIDER_HOST:http://spider:33023}/order")
+@FeignClient(name = "orderSpider", url = "${SPIDER_HOST:http://ecommerce-facade:33023}/order")
 public interface OrderSpiderApiFeign extends OrderSpiderApi {
 }

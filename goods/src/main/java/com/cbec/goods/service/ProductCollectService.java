@@ -5,7 +5,7 @@ import com.cbec.goods.dao.entity.ProductEntity;
 import com.cbec.goods.dao.entity.ProductResourceEntity;
 import com.cbec.goods.dao.entity.ProductSkuEntity;
 import com.cbec.internal.api.auth.PlatformAccountDTO;
-import com.cbec.internal.api.spider.GoodsSpiderApi;
+import com.cbec.internal.api.ecommerce_facade.GoodsSpiderApi;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
